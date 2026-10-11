@@ -1,11 +1,23 @@
 import "server-only";
-import { loginAttemptKeys, signUpAttemptKeys, type AttemptKeys } from "@/auth/attempt-keys";
+import {
+  loginAttemptKeys,
+  passwordChangeAttemptKeys,
+  signUpAttemptKeys,
+  type AttemptKeys,
+} from "@/auth/attempt-keys";
 import { hashPassword, verifyPassword } from "@/auth/password";
 import { isClubId } from "@/clubs/lookup";
 import { admitAttempt, settleSuccess, type Reservation } from "@/data/attempts";
 import { lockoutWaitMinutes } from "@/data/attempt-rules";
 import { EMAIL_MAX_LENGTH, PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH } from "@/data/limits";
-import { createUser, getUserCredentialsByEmail, setHomeClub, type User } from "@/data/users";
+import {
+  changePasswordHash,
+  createUser,
+  getUserCredentialsByEmail,
+  getUserCredentialsById,
+  setHomeClub,
+  type User,
+} from "@/data/users";
 import { parseEmail } from "@/forms/fields";
 import type { ThemeChoice } from "@/preferences/preferences";
 
@@ -187,6 +199,92 @@ export async function submitHomeClubChange(user: User | null, formData: FormData
       return { redirect: "/account?error=club" };
     case "not-found":
       // The user comes from the session, so this is a stale-session edge.
+      return { redirect: "/" };
+  }
+}
+
+/**
+ * The refusal codes `/account?error=` can carry for the change-password form,
+ * each with its own message on the page. None carries what was typed.
+ */
+export type PasswordChangeError =
+  | "password-invalid"
+  | "password-short"
+  | "password-mismatch"
+  | "password-same"
+  | "password-wrong"
+  | "password-stale";
+
+function passwordRefused(error: PasswordChangeError): SubmitResult {
+  return { redirect: `/account?error=${error}` };
+}
+
+/**
+ * Change the password. The user comes from the session (null for a visitor,
+ * who is sent to the landing page). Nothing is written until every check has
+ * passed.
+ *
+ * The checks that need no database come first and say what to fix: every field
+ * is a string within bounds (a hand-made request can send anything), the new
+ * password is long enough, it equals its confirmation, and it differs from the
+ * current one. They only compare what the user typed, so they reveal nothing
+ * and cost no attempt. Then the attempt is counted and the current password is
+ * checked against the stored hash: this is the guess the limiter exists for, so
+ * a stolen session can't be used to try passwords. A wrong one just says it is
+ * wrong; the counts and lockouts are `admit`'s, as at login.
+ *
+ * The write is conditional on the hash we verified still being the stored one,
+ * so two changes racing from the same old password can't both succeed. On
+ * success the result carries a session under the new hash: the old cookie (and
+ * every other device's) stops matching `passwordFingerprint`, and this device
+ * stays logged in through the fresh one the action starts.
+ */
+export async function submitPasswordChange(
+  user: User | null,
+  formData: FormData,
+  context: AttemptContext,
+): Promise<SubmitResult> {
+  if (!user) return { redirect: "/" };
+
+  const current = formData.get("current");
+  const next = formData.get("new");
+  const confirm = formData.get("confirm");
+  if (
+    typeof current !== "string" ||
+    typeof next !== "string" ||
+    typeof confirm !== "string" ||
+    current.length === 0 ||
+    current.length > PASSWORD_MAX_LENGTH ||
+    next.length > PASSWORD_MAX_LENGTH ||
+    confirm.length > PASSWORD_MAX_LENGTH
+  ) {
+    return passwordRefused("password-invalid");
+  }
+  if (next.length < PASSWORD_MIN_LENGTH) return passwordRefused("password-short");
+  if (next !== confirm) return passwordRefused("password-mismatch");
+  if (next === current) return passwordRefused("password-same");
+
+  const gate = await admit(passwordChangeAttemptKeys(user.id, context.ip), context.now);
+  if (!gate.admitted) return { redirect: `/account?wait=${gate.minutes ?? 0}` };
+
+  const stored = await getUserCredentialsById(user.id);
+  // The user comes from the session, so no row is a stale-session edge.
+  if (!stored) return { redirect: "/" };
+  // The failure is already counted (see `admit`), so nothing more to record.
+  if (!(await verifyPassword(current, stored.passwordHash))) return passwordRefused("password-wrong");
+
+  const passwordHash = await hashPassword(next);
+  switch (await changePasswordHash(user.id, stored.passwordHash, passwordHash)) {
+    case "changed":
+      await settle(gate.reservation);
+      return {
+        redirect: "/account?saved=password",
+        session: { id: user.id, passwordHash, theme: stored.preferences.theme },
+      };
+    case "stale":
+      // Another change got there first; this one wrote nothing.
+      return passwordRefused("password-stale");
+    case "not-found":
       return { redirect: "/" };
   }
 }

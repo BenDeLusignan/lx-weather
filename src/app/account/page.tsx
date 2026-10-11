@@ -1,32 +1,42 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
-import { changeHomeClub, logOut } from "@/auth/actions";
+import { changeHomeClub, changePassword, logOut } from "@/auth/actions";
 import { getCurrentUser } from "@/auth/current-user";
+import type { PasswordChangeError } from "@/auth/submit";
 import { findClub } from "@/clubs/lookup";
 import { SubmitButton } from "@/components/button";
 import { ChoiceGroup } from "@/components/choice-group";
 import { ClubSelect } from "@/components/club-select";
-import { Field } from "@/components/field";
+import { Field, controlClassName, describedBy, hintId } from "@/components/field";
 import { Form } from "@/components/form";
 import { FormMessage } from "@/components/form-message";
 import { PageLoading } from "@/components/loading";
 import { Narrow } from "@/components/narrow";
-import { BLOCK_HOURS, WEEKDAYS, type ThemeChoice } from "@/preferences/preferences";
-import { saveDays, saveHours, saveTheme } from "@/preferences/actions";
+import { PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH } from "@/data/limits";
+import { lockoutMessage } from "@/forms/lockout-message";
+import { BLOCK_HOURS, WEEKDAYS } from "@/preferences/preferences";
+import { saveDays, saveHours } from "@/preferences/actions";
 import { hourLabel } from "@/weather/format";
 import styles from "./page.module.css";
 
 export const metadata: Metadata = {
   title: "Account",
-  description: "Your email, your home club, how the site looks, the days and hours you see, and log out.",
+  description: "Your email, your home club, your password, the days and hours you see, and log out.",
 };
 
-const THEME_CHOICES: readonly { value: ThemeChoice; label: string }[] = [
-  { value: "system", label: "Match my device" },
-  { value: "light", label: "Light" },
-  { value: "dark", label: "Dark" },
-];
+// The codes the changePassword action redirects with, each with its own message.
+// A wrong current password only says it is wrong: nothing beyond what was typed.
+const PASSWORD_ERRORS: Record<PasswordChangeError, string> = {
+  "password-invalid": "Enter your current password. Nothing was changed.",
+  "password-short": `Use a new password of at least ${PASSWORD_MIN_LENGTH} characters. Nothing was changed.`,
+  "password-mismatch": "The new password and its confirmation don’t match. Nothing was changed.",
+  "password-same": "Choose a new password that is different from your current one. Nothing was changed.",
+  "password-wrong": "Your current password is wrong. Nothing was changed.",
+  "password-stale": "Your password was changed a moment ago, so this change wasn’t applied.",
+};
+
+const PASSWORD_MESSAGE_ID = "password-message";
 
 export default function AccountPage({ searchParams }: PageProps<"/account">) {
   return (
@@ -41,9 +51,15 @@ async function Account({ searchParams }: Pick<PageProps<"/account">, "searchPara
   const user = await getCurrentUser();
   if (!user) redirect("/");
 
-  const { saved, error } = await searchParams;
+  const { saved, error, wait } = await searchParams;
   // A stored club id that's no longer in the list: say so, and let them choose again.
   const homeClub = findClub(user.homeClubId);
+  // Change-password flags: `wait` is a limiter refusal (`lockoutMessage` copes with a hand-made value);
+  // `error` is only believed when it is one of our codes.
+  const passwordError = typeof error === "string" && Object.hasOwn(PASSWORD_ERRORS, error) ? (error as PasswordChangeError) : null;
+  const currentInvalid = passwordError === "password-wrong" || passwordError === "password-invalid";
+  const newInvalid = passwordError === "password-short" || passwordError === "password-same";
+  const confirmInvalid = passwordError === "password-mismatch";
 
   return (
     <Narrow>
@@ -89,24 +105,67 @@ async function Account({ searchParams }: Pick<PageProps<"/account">, "searchPara
         </Form>
       </section>
 
-      <section aria-labelledby="account-appearance" className={styles.section}>
-        <h2 id="account-appearance">Appearance</h2>
-        <Form action={saveTheme}>
-          {error === "theme" ? (
-            <FormMessage tone="error">Choose Match my device, Light or Dark. Nothing was changed.</FormMessage>
-          ) : saved === "theme" ? (
-            <FormMessage tone="success">Appearance saved.</FormMessage>
+      <section aria-labelledby="account-password" className={styles.section}>
+        <h2 id="account-password">Change password</h2>
+        <Form action={changePassword}>
+          {wait !== undefined ? (
+            <FormMessage tone="error" id={PASSWORD_MESSAGE_ID}>
+              {lockoutMessage(wait)}
+            </FormMessage>
+          ) : passwordError ? (
+            <FormMessage tone="error" id={PASSWORD_MESSAGE_ID}>
+              {PASSWORD_ERRORS[passwordError]}
+            </FormMessage>
+          ) : saved === "password" ? (
+            <FormMessage tone="success">Password changed. Other devices have been logged out.</FormMessage>
           ) : null}
-          <ChoiceGroup
-            legend="Light or dark"
-            hint="Match my device follows your phone or computer’s own light or dark setting."
-            hintId="account-theme-hint"
-            type="radio"
-            name="theme"
-            choices={THEME_CHOICES.map((choice) => ({ ...choice, checked: choice.value === user.preferences.theme }))}
-          />
+          <Field id="password-current" label="Current password">
+            <input
+              id="password-current"
+              name="current"
+              type="password"
+              required
+              maxLength={PASSWORD_MAX_LENGTH}
+              autoComplete="current-password"
+              aria-invalid={currentInvalid || undefined}
+              aria-describedby={describedBy(currentInvalid && PASSWORD_MESSAGE_ID)}
+              className={controlClassName}
+            />
+          </Field>
+          <Field
+            id="password-new"
+            label="New password"
+            hint={`At least ${PASSWORD_MIN_LENGTH} characters. Changing it logs you out of your other devices.`}
+          >
+            <input
+              id="password-new"
+              name="new"
+              type="password"
+              required
+              minLength={PASSWORD_MIN_LENGTH}
+              maxLength={PASSWORD_MAX_LENGTH}
+              autoComplete="new-password"
+              aria-invalid={newInvalid || undefined}
+              aria-describedby={describedBy(hintId("password-new"), newInvalid && PASSWORD_MESSAGE_ID)}
+              className={controlClassName}
+            />
+          </Field>
+          <Field id="password-confirm" label="Confirm new password">
+            <input
+              id="password-confirm"
+              name="confirm"
+              type="password"
+              required
+              minLength={PASSWORD_MIN_LENGTH}
+              maxLength={PASSWORD_MAX_LENGTH}
+              autoComplete="new-password"
+              aria-invalid={confirmInvalid || undefined}
+              aria-describedby={describedBy(confirmInvalid && PASSWORD_MESSAGE_ID)}
+              className={controlClassName}
+            />
+          </Field>
           <div>
-            <SubmitButton>Save appearance</SubmitButton>
+            <SubmitButton>Change password</SubmitButton>
           </div>
         </Form>
       </section>

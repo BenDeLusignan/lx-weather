@@ -61,3 +61,15 @@ export function loginAttemptKeys(email: string, ip: string | null): AttemptKeys 
 export function signUpAttemptKeys(email: string, ip: string | null): AttemptKeys {
   return keys(`signup:${email.trim().toLowerCase()}`, ip);
 }
+
+/**
+ * Keys for a change-password attempt: the logged-in user's id and the client
+ * address. The wrong "current password" is the guess being limited, so a stolen
+ * session can't be used to try passwords against the account. The id is a
+ * number from the verified session, not typed input, so there is no email to
+ * normalise. The address counter is the same one login and sign-up use, so
+ * one address can't get a fresh budget by switching between the three.
+ */
+export function passwordChangeAttemptKeys(userId: number, ip: string | null): AttemptKeys {
+  return keys(`password:${userId}`, ip);
+}

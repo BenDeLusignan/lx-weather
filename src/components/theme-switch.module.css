@@ -1,0 +1,100 @@
+/*
+ * The header's light/dark switch. Two buttons side by side, each 44px tall (the
+ * touch target, vision Team convention 7) and 40px wide, sit over a 32px pill,
+ * so the pill looks like a slim slider while each half is still easy to hit on
+ * a phone. Colours are the --color-switch-* tokens (globals.css has their contrast).
+ *
+ * Which half is "on" is never in this file's markup: the knob's position comes
+ * from --theme-is-dark (globals.css), which follows the theme in effect, and
+ * the two icons swap their colours with light-dark(). So the first paint is
+ * right in both themes and for "match my device".
+ */
+.form {
+  flex: none;
+}
+
+.track {
+  --knob: 1.5rem;
+  /* One half of the switch: 40px wide, 44px tall (the touch target), so the whole thing is 80px and fits a 360px header beside the wordmark and Account. */
+  --cell: 2.5rem;
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(2, var(--cell));
+  height: var(--touch-target);
+}
+
+/* The pill, behind the buttons. 0.375rem each side makes it 2rem tall in the 2.75rem track. */
+.track::before {
+  content: "";
+  position: absolute;
+  inset: 0.375rem 0;
+  border: 2px solid var(--color-switch-edge);
+  border-radius: 999px;
+  background: var(--color-switch-track);
+}
+
+/* Centred in the left half, then slid across by one half when the dark theme is in effect. */
+.knob {
+  position: absolute;
+  top: 50%;
+  left: calc((var(--cell) - var(--knob)) / 2);
+  width: var(--knob);
+  height: var(--knob);
+  margin-top: calc(var(--knob) / -2);
+  border-radius: 50%;
+  background: var(--color-switch-knob);
+  translate: calc(var(--theme-is-dark) * var(--cell));
+  transition: translate var(--duration-fast) ease-out;
+}
+
+.option {
+  position: relative;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.option:focus-visible {
+  outline-color: var(--color-header-focus);
+  outline-offset: -2px;
+}
+
+.glyph {
+  width: 1rem;
+  height: 1rem;
+  transition: scale var(--duration-fast);
+}
+
+.option:hover .glyph {
+  scale: 1.15;
+}
+
+/* The icon over the knob is the "on" colour, the other is the "off" one; the sun is on in light, the moon in dark. */
+.sun {
+  color: light-dark(var(--color-switch-glyph-on), var(--color-switch-glyph-off));
+}
+
+.moon {
+  color: light-dark(var(--color-switch-glyph-off), var(--color-switch-glyph-on));
+}
+
+/*
+ * Windows high contrast drops background colours, which would make the knob
+ * vanish: draw it as a ring round the chosen icon instead, and the icons in the
+ * system text colour.
+ */
+@media (forced-colors: active) {
+  .knob {
+    background: transparent;
+    border: 2px solid Highlight;
+  }
+
+  .sun,
+  .moon {
+    color: ButtonText;
+  }
+}

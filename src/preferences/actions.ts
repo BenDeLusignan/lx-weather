@@ -1,7 +1,9 @@
 "use server";
 
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/auth/current-user";
+import { returnPath } from "./return-path";
 import { submitDays, submitHours, submitTheme, type PreferenceResult } from "./submit";
 import { setThemeCookie } from "./theme-cookie";
 
@@ -14,8 +16,14 @@ async function finish(result: PreferenceResult): Promise<never> {
   redirect(result.redirect);
 }
 
+/**
+ * The header's light/dark switch (`ThemeSwitch`). Back to the page it was used
+ * on (`return-path.ts`), so it works from every screen.
+ */
 export async function saveTheme(formData: FormData): Promise<never> {
-  return finish(await submitTheme(await getCurrentUser(), formData));
+  const sent = await headers();
+  const returnTo = returnPath(sent.get("referer"), [sent.get("host"), sent.get("x-forwarded-host")]);
+  return finish(await submitTheme(await getCurrentUser(), formData, returnTo));
 }
 
 export async function saveDays(formData: FormData): Promise<never> {

@@ -6,7 +6,7 @@
  * and one blue accent. No purple, no pink, no glows. The traffic lights are
  * the only strong colours on the page.
  *
- * Which theme applies (the contract with the Account page; see vision):
+ * Which theme applies (the contract with the header's light/dark switch; see vision):
  *   no data-theme on <html>   follow the device (prefers-color-scheme)
  *   data-theme="light"        light, even on a dark device
  *   data-theme="dark"         dark, even on a light device
@@ -56,13 +56,29 @@
  *   frame on white (2.1) and the ring on white is 14.7; in the dark theme
  *   page and halo are both black and the ring on black is 7.4.
  *
- * The brand mark (the same in both themes): the white cloud on the tile 7.4
- * and the lime ball on the tile 5.6, both over 3. The tile on header-bg is 3.5
- * (light, 4.4 on the hover fill, 7.4 on a white page) and 2.9 (dark), on the
- * dark page 2.9, a touch under 3; the dark theme adds mark-edge, a ring of
- * #2f7fb3 that is 4.8 on black, so the tile's edge is clear there; the light
- * theme needs none. The mark is decorative (aria-hidden, the words beside
- * it are the name).
+ * The header's theme switch (a track with a sun and a moon, and a knob under
+ * the one in effect), light theme, then dark. Every token is built from ones
+ * above, so it can't drift from the header's own colours:
+ *   switch-edge on header-bg (needs 3)           7.0                    6.4
+ *   switch-knob on switch-track (needs 3)        8.9                    7.4
+ *   glyph-on, the icon on the knob (needs 3)    14.7                    7.4
+ *   glyph-off, the other icon on the track (3)   8.9                    8.2
+ *   (the track's fill is only a tint: 1.3 on header-bg in light, black on
+ *   black in dark. The edge is what shows the control, the 3:1 above.)
+ * The wordmark's text is header-text, so it is the 7.0 / 19.3 above; its
+ * offset shadow (wordmark-edge) and glow are decoration, not text.
+ *
+ * The brand mark (the same in both themes): the tile is Apple Weather's own
+ * sky, sampled from the icon in the App Store (#2e93fd at the top, #1c73dc at
+ * the bottom), easing from the first to the second by 55% of the way down. The
+ * white cloud on the tile is 3.1 to 3.2 where it meets the lightest top, 4.2
+ * at its foot; the lime ball on the deep blue is 3.5 (3.3 where the top ball
+ * starts, still on the easing), all over 3. The tile on header-bg is only 2.2
+ * (1.5 at its light top) in the light theme, so the header draws mark-edge in
+ * that theme, a 1px ring in its own navy: 7.0 on header-bg, 8.9 on
+ * its hover fill. The dark theme needs none: the tile is 4.5 (6.7 at the top)
+ * on black, and on the white log in page 4.6 (3.1 at the top). The mark is
+ * decorative (aria-hidden, the words beside it are the name).
  *
  * Traffic lights (a cell's text on its own fill; the icon's fill on that fill,
  * needs 3; the card's open ring is --color-text, which is 12.5 to 14.1 on
@@ -97,6 +113,14 @@
 :root {
   /* Follow the device unless <html data-theme> says otherwise (below). */
   color-scheme: light dark;
+
+  /*
+   * 1 when the dark theme is in effect, else 0, for the one thing a colour
+   * token can't carry: the switch's knob slides to a position (light-dark()
+   * only takes colours). Set below, from the same two conditions as
+   * color-scheme, so the knob can never disagree with the page.
+   */
+  --theme-is-dark: 0;
 
   /*
    * Surfaces and text: light-dark(light value, dark value). The dark values
@@ -134,15 +158,20 @@
 
   /*
    * The brand mark carries its own background, so it is the same in both
-   * themes. src/app/icon.svg hard-codes these three (see vision.md "Theme").
-   * `mark-edge` is a hairline ring round the tile, only in the dark theme: the
-   * tile on black is 2.9:1, a touch under the 3 it needs, and the ring lifts it.
-   * The light theme needs none: the tile is 3.5:1 on the light blue header.
+   * themes. src/app/icon.svg hard-codes the first four (see vision.md "Theme");
+   * `mark-bg-top` and `mark-bg` are the two ends of Apple Weather's sky
+   * gradient, and `mark-bg` is also the ball's seam colour. `mark-edge` is the
+   * hairline ring round the tile and is none by default: on the white log in
+   * page the tile is 4.6:1 and needs none. The header sets it (in
+   * site-header.module.css) to its navy in the light theme, because the tile
+   * on the light blue header is 2.2:1, under the 3 it needs; the dark theme's
+   * tile is 4.5:1 on its black header, so there it stays none.
    */
-  --color-mark-bg: #0a5a8c;
+  --color-mark-bg-top: #2e93fd;
+  --color-mark-bg: #1c73dc;
   --color-mark-cloud: #ffffff;
   --color-mark-ball: #d9ec3f;
-  --color-mark-edge: light-dark(transparent, #2f7fb3);
+  --color-mark-edge: transparent;
 
   /*
    * The header (Ben, 11 Oct 2026: "make the header a light blue, like the blue
@@ -160,6 +189,28 @@
   --color-header-border: light-dark(#5a96d6, #38383a);
   --color-header-hover: light-dark(#a2cdf8, #2c2c2e);
   --color-header-focus: light-dark(#0a2a43, #409cff);
+
+  /*
+   * The header's light/dark switch (Ben, 11 Oct 2026). A pill with a sun and
+   * a moon in it and a knob under the one that is in effect. All five are made
+   * from the colours above: in light the header's navy on its own light blue,
+   * in dark the page's blue accent on black, as a button is.
+   */
+  --color-switch-edge: light-dark(var(--color-header-text), var(--color-border-strong));
+  --color-switch-track: light-dark(var(--color-header-hover), var(--color-header-bg));
+  --color-switch-knob: light-dark(var(--color-header-text), var(--color-button-bg));
+  /* The icon the knob is over, and the other one on the bare track. */
+  --color-switch-glyph-on: var(--color-button-text);
+  --color-switch-glyph-off: light-dark(var(--color-header-text), var(--color-text-muted));
+
+  /*
+   * The wordmark's flourish (Ben, 11 Oct 2026: "more energetic like the other
+   * things we have made"): a hard offset behind the letters, like LX Tennis's,
+   * and a soft blue glow in the dark theme only, where there is black to glow
+   * on. Decoration only; the text colour is header-text.
+   */
+  --color-wordmark-edge: light-dark(#ffffff, var(--color-button-bg));
+  --color-wordmark-glow: light-dark(transparent, color-mix(in srgb, var(--color-button-bg) 45%, transparent));
 
   /*
    * The traffic lights (vision, Core flow 3). Per light: `bg` is a cell's fill,
@@ -183,6 +234,8 @@
 
   /* Type: the system font, so nothing is downloaded and it looks at home on every device. */
   --font-body: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  /* The wordmark only: the display face LX Tennis uses for its brand (layout.tsx loads it). */
+  --font-display: var(--font-orbitron), "Trebuchet MS", system-ui, sans-serif;
   --font-size-xs: 0.75rem;
   --font-size-sm: 0.875rem;
   --font-size-base: 1rem;
@@ -209,7 +262,7 @@
 }
 
 /*
- * The user's choice from the Account page, set on <html> as data-theme. With
+ * The user's choice from the header's switch, set on <html> as data-theme. With
  * no attribute the :root rule above stands and light-dark() follows the device.
  * It also makes the browser's own controls (select, scrollbars) match.
  */
@@ -219,6 +272,13 @@
 
 :root[data-theme="dark"] {
   color-scheme: dark;
+  --theme-is-dark: 1;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    --theme-is-dark: 1;
+  }
 }
 
 *,

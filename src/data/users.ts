@@ -1,5 +1,5 @@
 import "server-only";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { isClubId } from "@/clubs/lookup";
 import { getDb } from "@/db/client";
 import { user } from "@/db/schema";
@@ -118,6 +118,30 @@ export async function setHomeClub(
     .where(eq(user.id, userId))
     .returning({ id: user.id });
   return updated.length > 0 ? "saved" : "not-found";
+}
+
+/**
+ * Replaces a user's password hash, but only if it is still `expectedHash`.
+ * One conditional UPDATE, so it is atomic: of two changes that both started
+ * from the same old hash only one can match the row, and the other gets
+ * `stale` and writes nothing. (A read, a check and a write in separate steps
+ * would let both through.)
+ */
+export async function changePasswordHash(
+  userId: number,
+  expectedHash: string,
+  newHash: string,
+): Promise<"changed" | "stale" | "not-found"> {
+  const db = getDb();
+  const updated = await db
+    .update(user)
+    .set({ passwordHash: newHash })
+    .where(and(eq(user.id, userId), eq(user.passwordHash, expectedHash)))
+    .returning({ id: user.id });
+  if (updated.length > 0) return "changed";
+  // No row matched: either the hash moved on, or the account is gone.
+  const [row] = await db.select({ id: user.id }).from(user).where(eq(user.id, userId));
+  return row ? "stale" : "not-found";
 }
 
 /**

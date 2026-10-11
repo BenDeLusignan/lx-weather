@@ -2,12 +2,13 @@
   display: block;
   flex: none;
   /*
-   * The hairline ring is --color-mark-edge: none in the light theme, a lighter
-   * blue in the dark one, where the tile on a black page is a touch under 3:1
-   * (globals.css). The radius is the tile's rx of 14 in the 64 viewBox, so the
-   * ring follows the tile's corners.
+   * The tile: Apple Weather's sky, `mark-bg-top` easing into `mark-bg` by 55%
+   * of the way down, which is the stop in icon.svg. The radius is the tile's rx
+   * of 14 in the 64 viewBox.
    */
   border-radius: 21.875%;
+  background: linear-gradient(to bottom, var(--color-mark-bg-top), var(--color-mark-bg) 55%);
+  /* A hairline ring, --color-mark-edge: none except in the header (globals.css says why). */
   box-shadow: 0 0 0 1px var(--color-mark-edge);
 }
 
@@ -19,10 +20,6 @@
 .lg {
   width: 4rem;
   height: 4rem;
-}
-
-.bg {
-  fill: var(--color-mark-bg);
 }
 
 .ball {

@@ -5,7 +5,13 @@ import { clientIp } from "@/auth/client-ip";
 import { getCurrentUser } from "@/auth/current-user";
 import { endSession, startSession } from "@/auth/session";
 import { setThemeCookie } from "@/preferences/theme-cookie";
-import { submitHomeClubChange, submitLogin, submitSignUp, type SubmitResult } from "@/auth/submit";
+import {
+  submitHomeClubChange,
+  submitLogin,
+  submitPasswordChange,
+  submitSignUp,
+  type SubmitResult,
+} from "@/auth/submit";
 
 // Every action ends in redirect(), never by returning to render the page. A
 // form posted before the page's JavaScript has loaded is a plain HTML POST:
@@ -47,4 +53,11 @@ export async function logOut(): Promise<never> {
 
 export async function changeHomeClub(formData: FormData): Promise<never> {
   return finish(await submitHomeClubChange(await getCurrentUser(), formData));
+}
+
+// A successful change returns a fresh session, which `finish` starts: the old
+// cookie no longer matches the new hash, and so neither does any other
+// device's, so this device stays in and the rest are logged out.
+export async function changePassword(formData: FormData): Promise<never> {
+  return finish(await submitPasswordChange(await getCurrentUser(), formData, await attemptContext()));
 }

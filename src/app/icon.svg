@@ -1,19 +1,40 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <!-- Static asset: the colours are the tokens color-mark-bg (#0a5a8c),
-       color-mark-ball (#d9ec3f) and color-mark-cloud (#ffffff) from
-       src/app/globals.css, written as hex because an SVG file can't read CSS
-       variables. components/brand-mark.tsx draws the same picture with the
-       tokens; change both together. The cloud sits above the ball with a small
-       gap, not overlapping: white on lime has almost no contrast, so an overlap
-       would blur the cloud's edge at 16px. Never write a double hyphen inside a
-       comment here, not even in a token name: XML forbids it and the browser
-       then drops the whole icon without any error. -->
-  <rect width="64" height="64" rx="14" fill="#0a5a8c"/>
-  <circle cx="32" cy="46" r="13" fill="#d9ec3f"/>
-  <path d="M23.2 37.5c4.5 3.5 4.5 13 0 17M40.8 37.5c-4.5 3.5-4.5 13 0 17" fill="none" stroke="#0a5a8c" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Static asset: the colours are the tokens color-mark-bg-top (#2e93fd),
+       color-mark-bg (#1c73dc), color-mark-ball (#d9ec3f) and color-mark-cloud
+       (#ffffff) from src/app/globals.css, written as hex because an SVG file
+       can't read CSS variables. components/brand-mark.tsx draws the same
+       picture with the tokens; change both together, and re-render
+       apple-icon.png. The picture is a cloud raining three tennis balls down a
+       diagonal, growing as they fall. The balls sit clear of the cloud and of
+       each other: white on lime has almost no contrast, so an overlap would
+       blur the cloud's edge at 16px. The tile is Apple Weather's own sky
+       gradient, sampled from its icon, settling to the deeper blue by 55
+       percent of the way down so the lime balls on it clear 3 to 1. Never
+       write a double hyphen inside a comment here, not even in a token name:
+       XML forbids it and the browser then drops the whole icon without any
+       error. -->
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2e93fd"/>
+      <stop offset="0.55" stop-color="#1c73dc"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="url(#sky)"/>
+  <g transform="translate(23 36) scale(0.462)">
+    <circle r="13" fill="#d9ec3f"/>
+    <path d="M-8.8-8.5c4.5 3.5 4.5 13 0 17M8.8-8.5c-4.5 3.5-4.5 13 0 17" fill="none" stroke="#1c73dc" stroke-width="2.5" stroke-linecap="round"/>
+  </g>
+  <g transform="translate(35 45) scale(0.5)">
+    <circle r="13" fill="#d9ec3f"/>
+    <path d="M-8.8-8.5c4.5 3.5 4.5 13 0 17M8.8-8.5c-4.5 3.5-4.5 13 0 17" fill="none" stroke="#1c73dc" stroke-width="2.5" stroke-linecap="round"/>
+  </g>
+  <g transform="translate(47.5 54.5) scale(0.577)">
+    <circle r="13" fill="#d9ec3f"/>
+    <path d="M-8.8-8.5c4.5 3.5 4.5 13 0 17M8.8-8.5c-4.5 3.5-4.5 13 0 17" fill="none" stroke="#1c73dc" stroke-width="2.5" stroke-linecap="round"/>
+  </g>
   <g fill="#ffffff">
-    <rect x="10" y="17" width="44" height="12" rx="6"/>
-    <circle cx="24" cy="18" r="8"/>
-    <circle cx="36" cy="16" r="10"/>
+    <rect x="8" y="14" width="44" height="13" rx="6.5"/>
+    <circle cx="22" cy="15" r="8.5"/>
+    <circle cx="36" cy="13.5" r="10.5"/>
   </g>
 </svg>

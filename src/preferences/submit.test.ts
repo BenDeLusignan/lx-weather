@@ -37,22 +37,28 @@ test("a new account has the defaults: follow the device, every day, every hour",
   assert.deepEqual(await stored("defaults@example.com"), UNTOUCHED);
 });
 
-test("the theme saves, and the redirect says which one so the device's cookie follows", async () => {
+// The page the header's switch was used on: both a save and a refusal go back to it.
+const PAGE = "/away/omagh";
+
+test("the theme saves and goes back to the page, saying which theme so the device's cookie follows", async () => {
   const me = await newUser("theme@example.com");
-  assert.deepEqual(await submitTheme(me, form("theme", "dark")), { redirect: "/account?saved=theme", theme: "dark" });
+  assert.deepEqual(await submitTheme(me, form("theme", "dark"), PAGE), { redirect: PAGE, theme: "dark" });
   assert.equal((await stored("theme@example.com")).theme, "dark");
-  assert.deepEqual(await submitTheme(me, form("theme", "system")), { redirect: "/account?saved=theme", theme: "system" });
+  assert.deepEqual(await submitTheme(me, form("theme", "light"), PAGE), { redirect: PAGE, theme: "light" });
+  assert.equal((await stored("theme@example.com")).theme, "light");
+  // Not offered by the switch, but a valid stored value: saved, not refused.
+  assert.deepEqual(await submitTheme(me, form("theme", "system"), PAGE), { redirect: PAGE, theme: "system" });
   assert.equal((await stored("theme@example.com")).theme, "system");
 });
 
-test("an unknown, missing or repeated theme is refused and nothing changes", async () => {
+test("an unknown, missing or repeated theme changes nothing, sets no cookie and goes back to the page", async () => {
   const me = await newUser("badtheme@example.com");
   for (const bad of ["purple", "", "DARK", "dark ", "system; drop table user"]) {
-    assert.deepEqual(await submitTheme(me, form("theme", bad)), { redirect: "/account?error=theme" }, bad);
+    assert.deepEqual(await submitTheme(me, form("theme", bad), PAGE), { redirect: PAGE }, bad);
   }
-  assert.deepEqual(await submitTheme(me, new FormData()), { redirect: "/account?error=theme" }, "nothing posted");
-  assert.deepEqual(await submitTheme(me, form("theme", "dark", "light")), { redirect: "/account?error=theme" }, "two values: FormData.get would pick the first");
-  assert.deepEqual(await submitTheme(me, form("theme", new File([], "dark") as unknown as string)), { redirect: "/account?error=theme" }, "a file");
+  assert.deepEqual(await submitTheme(me, new FormData(), PAGE), { redirect: PAGE }, "nothing posted");
+  assert.deepEqual(await submitTheme(me, form("theme", "dark", "light"), PAGE), { redirect: PAGE }, "two values: FormData.get would pick the first");
+  assert.deepEqual(await submitTheme(me, form("theme", new File([], "dark") as unknown as string), PAGE), { redirect: PAGE }, "a file");
   assert.deepEqual(await stored("badtheme@example.com"), UNTOUCHED);
 });
 
@@ -90,7 +96,7 @@ test("each form saves only its own setting", async () => {
   const me = await newUser("separate@example.com");
   await submitDays(me, form("days", "mon"));
   await submitHours(me, form("hours", "10"));
-  await submitTheme(me, form("theme", "light"));
+  await submitTheme(me, form("theme", "light"), "/");
   assert.deepEqual(await stored("separate@example.com"), { theme: "light", days: 1, hours: 1 });
   // A refused post leaves the others as they were.
   await submitDays(me, new FormData());
@@ -99,7 +105,7 @@ test("each form saves only its own setting", async () => {
 
 test("a visitor can't save anything", async () => {
   const me = await newUser("visitor@example.com");
-  assert.deepEqual(await submitTheme(null, form("theme", "dark")), { redirect: "/" });
+  assert.deepEqual(await submitTheme(null, form("theme", "dark"), "/account"), { redirect: "/" });
   assert.deepEqual(await submitDays(null, form("days", "mon")), { redirect: "/" });
   assert.deepEqual(await submitHours(null, form("hours", "10")), { redirect: "/" });
   assert.deepEqual(await stored("visitor@example.com"), UNTOUCHED);
@@ -142,7 +148,7 @@ test("the table itself refuses an empty or out-of-range set from a raw write", a
 
 test("log in and sign up carry the account's theme, so the device's theme cookie follows who just logged in", async () => {
   const me = await newUser("carry@example.com");
-  await submitTheme(me, form("theme", "light"));
+  await submitTheme(me, form("theme", "light"), "/");
 
   const login = new FormData();
   login.set("email", "carry@example.com");

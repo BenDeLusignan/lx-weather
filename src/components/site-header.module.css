@@ -8,14 +8,28 @@
   color: var(--color-header-text);
 }
 
+/*
+ * wrap is only the safety net for enlarged text: at 360px and normal text size
+ * the wordmark, the switch and Account fit on one row (the wordmark stacks to
+ * two short lines on a phone to make that room; see .name).
+ */
 .nav {
+  /* The tile is only 2.2:1 on the light blue header, so the mark gets a navy hairline here (none in the dark theme, where it is 4.5:1); see globals.css. */
+  --color-mark-edge: light-dark(var(--color-header-text), transparent);
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-2);
+  gap: var(--space-1);
   max-width: var(--content-width);
   margin-inline: auto;
   padding: var(--space-1) var(--space-3);
+}
+
+/* The switch and Account, kept together at the right. */
+.actions {
+  display: flex;
+  align-items: center;
 }
 
 /*
@@ -23,11 +37,19 @@
  * page, so in the header's band they are re-coloured here, only for the
  * header's links, rather than changing the shared Button. `.nav a` is more
  * specific than the button's own classes, so these win without !important.
- * nowrap: "LX Tennis Weather" must stay on one line beside Account at 360px.
+ * nowrap: "Account" must not break; the wordmark opts back in below.
+ * The side padding is halved on a phone (the button's own is 1rem) to give the
+ * wordmark and the switch room at 360px.
  */
 .nav a {
+  padding-inline: var(--space-2);
   color: var(--color-header-text);
   white-space: nowrap;
+}
+
+/* The wordmark link also gives up most of its side padding on a phone, which lines the mark up with the page's 12px gutter, nearly. */
+.nav > a {
+  padding-inline: var(--space-1);
 }
 
 .nav a:hover {
@@ -38,9 +60,71 @@
   outline-color: var(--color-header-focus);
 }
 
+/*
+ * The wordmark, in the manner of LX Tennis's brand (Orbitron, extra bold, upper
+ * case, wide tracking; vision, Theme) and, for this site's calmer header, a
+ * slant and a hard offset behind the letters instead of a neon glow (the glow
+ * is there only in the dark theme, where it has black to sit on). It is still
+ * plain text in a link, so it reads as "LX Tennis Weather".
+ *
+ * On a phone there is no room for 17 wide capitals on one line, so a big "LX"
+ * sits beside "Tennis" over "Weather". From 48rem it is one line.
+ */
+.wordmark {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-family: var(--font-display);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-shadow:
+    2px 2px 0 var(--color-wordmark-edge),
+    0 0 0.75rem var(--color-wordmark-glow);
+  /* The slant makes it look fast; the text itself is untouched, and a hover leans it further. */
+  transform: skewX(-10deg);
+  transition: transform var(--duration-fast);
+}
+
+.nav a:hover .wordmark {
+  transform: skewX(-14deg);
+}
+
+.lx {
+  font-size: 1.25rem;
+}
+
+/* `width: min-content` is as wide as "Weather", so the two words fall onto two lines. */
+.wordmark .name {
+  display: block;
+  width: min-content;
+  font-size: 0.625rem;
+  line-height: 1.25;
+  white-space: normal;
+}
+
 /* Breakpoint 48rem: see vision.md "Theme". The header lines up with the page's padding. */
 @media (min-width: 48rem) {
   .nav {
     padding-inline: var(--space-4);
+  }
+
+  .nav a {
+    padding-inline: var(--space-4);
+  }
+
+  .nav > a {
+    padding-inline: var(--space-3);
+  }
+
+  .lx {
+    font-size: 1.75rem;
+  }
+
+  .wordmark .name {
+    width: auto;
+    font-size: 1.125rem;
+    white-space: nowrap;
   }
 }

@@ -62,7 +62,7 @@ npm run dev              # dev server at http://localhost:3000
 npm run build            # production build
 npm run start            # serve the production build
 npm run lint             # ESLint
-npm test                 # tests (tsx --test): accounts, the login limiter, sessions, home club, your settings (theme, days, hours), club list, display formatting, the forecast engine. Uses throwaway databases, never local.db; no network
+npm test                 # tests (tsx --test): accounts, the login limiter, sessions, password change, home club, your settings (theme, days, hours), club list, display formatting, the forecast engine. Uses throwaway databases, never local.db; no network
 npx tsc --noEmit         # type check
 npm run db:generate      # after editing src/db/schema.ts: write the SQL migration into drizzle/
 npm run db:migrate       # apply pending migrations in drizzle/ to DATABASE_URL
@@ -78,12 +78,14 @@ npm run forecast -- <latitude> <longitude>   # live week for any point
 | `/signup` | Email, password (12+ characters), home club |
 | `/away` | The other clubs, alphabetical |
 | `/away/[clubId]` | The same week screen for that club |
-| `/account` | Email, change home club, light or dark, which days and hours you see, log out |
+| `/account` | Email, change home club, change password (logs out your other devices), which days and hours you see, log out |
+| (every logged-in screen) | The header: the LX Tennis Weather link home, a light/dark slider (saves your choice and comes back to the same page), and Account |
 
 ## Gotchas
 
 - **Colours go in tokens.** Never write a hex value in a component or a CSS Module: add a token to `src/app/globals.css` (both its light and its dark value, and its contrast ratio in the header comment). The exceptions that mirror tokens are in the vision, "Theme", Team conventions.
 - **Check the week at 360px and 768px after touching the hour cells.** "Passable", "100%" and "29 mph" have to fit the narrowest cell without wrapping, and every cell must stay the same size; the vision's "Theme" says why and where.
+- **The header's wordmark uses Orbitron from `next/font/google`.** The font is fetched from Google once, at `next dev` start and at `next build`, and then self-hosted from the site's own domain; visitors never contact Google. A build with no network can't fetch it, so build online.
 - **`PageProps` / `LayoutProps` are generated types.** Next creates them in `.next/` (gitignored), so on a fresh clone your editor and `tsc` will report them as missing until you run `npm run dev`, `npm run build` or `npx next typegen` once.
 - **`npm test` runs `tsx --conditions=react-server`.** Server-side modules import `server-only`, which throws when loaded outside the React server environment; that flag tells Node to load the server build of it. Don't remove it from `package.json`, or the tests will fail on import.
 - **`next dev` rewrites part of `AGENTS.md`.** When it detects an AI coding agent and the Next.js block is missing or out of date, it rewrites everything between the `<!-- BEGIN:nextjs-agent-rules -->` and `<!-- END:nextjs-agent-rules -->` markers. Don't edit inside those markers; put project notes outside them.
