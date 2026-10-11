@@ -7,19 +7,32 @@
  * Every colour, size and space the site uses is defined here once, as a
  * semantic token. Components use the tokens, never a hex value, so the whole
  * look can be re-tuned in this block. There is no separate palette layer: each
- * token is written twice (light, then dark) and that is the whole theme.
+ * token is written twice (light, then dark) and that is the whole theme. The
+ * exceptions are the mark and header tokens, which are the same in both themes
+ * and so are written once.
  *
  * Contrast, WCAG 2.x (AA: 4.5:1 for text, 3:1 for icons and control edges),
  * measured with the WCAG relative-luminance formula. Light theme, then dark:
  *
- *   text on bg / surface / surface-sunken     14.7 / 16.3 / 13.5     16.0 / 13.9 / 15.1
- *   text-muted on bg / surface / sunken        6.7 /  7.4 /  6.1      9.2 /  8.0 /  8.8
- *   link on bg / surface / sunken              6.6 /  7.4 /  6.1      9.5 /  8.3 /  9.0
- *   error on bg / surface / sunken             6.8 /  7.6 /  6.3      8.9 /  7.7 /  8.4
- *   success on bg / surface / sunken           6.0 /  6.7 /  5.5     10.6 /  9.2 / 10.1
+ *   text on bg / surface / surface-sunken     14.7 / 16.3 / 13.5     13.9 / 11.6 / 15.1
+ *   text-muted on bg / surface / sunken        6.7 /  7.4 /  6.1      8.0 /  6.7 /  8.8
+ *   link on bg / surface / sunken              6.6 /  7.4 /  6.1      8.3 /  6.9 /  9.0
+ *   error on bg / surface / sunken             6.8 /  7.6 /  6.3      7.7 /  6.5 /  8.4
+ *   success on bg / surface / sunken           6.0 /  6.7 /  5.5      9.2 /  7.7 / 10.1
  *   button-text on button-bg                   7.4                    8.8
- *   focus on bg / surface (needs 3)            6.6 /  7.4             9.5 /  8.3
- *   border-strong on bg / surface (needs 3)    3.6 /  4.0             5.1 /  4.5
+ *   focus on bg / surface (needs 3)            6.6 /  7.4             8.3 /  6.9
+ *   border-strong on bg / surface (needs 3)    3.6 /  4.0             4.5 /  3.7
+ *
+ * The header (one dark band in both themes, so one set of numbers):
+ *   header-text on header-bg / header-hover    16.0 / 11.6
+ *   header-focus on header-bg / header-hover (needs 3)    9.5 / 6.9
+ *   header-border on header-bg (a decorative divider: the fills already differ)   2.1
+ *   The brand mark's tile (#0a5a8c) on header-bg is 2.5, under 3, but the tile
+ *   is only the mark's backdrop: the white cloud (18.1) and the lime ball (13.8)
+ *   carry the picture, and it is decorative (aria-hidden, the words beside it
+ *   are the name), so WCAG 1.4.11 doesn't apply.
+ *   In the dark theme the header is 1.15 against the body: a quiet step (the
+ *   swap Ben asked for), not a text pairing.
  *
  * Traffic lights (a cell's text on its own fill; the icon's fill on that fill,
  * needs 3):
@@ -66,6 +79,19 @@
   --color-mark-bg: #0a5a8c;
   --color-mark-cloud: #ffffff;
   --color-mark-ball: #d9ec3f;
+
+  /*
+   * The header is a dark band in both themes (Ben: "the header should always
+   * be dark"), so these are written once, like the mark. In the dark theme
+   * it is darker than the body (--color-bg), in the light theme it is the
+   * only dark thing on the page. `hover` is the quiet buttons' hover fill and
+   * `focus` the keyboard ring; both are scoped to the header (site-header.module.css).
+   */
+  --color-header-bg: #0b1721;
+  --color-header-text: #e9f2f7;
+  --color-header-border: #34505f;
+  --color-header-hover: #1b3341;
+  --color-header-focus: #7cc4f0;
 
   /*
    * The traffic lights (vision, Core flow 3). Per light: `bg` is a cell's fill,
@@ -116,10 +142,15 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --color-bg: #0b1721;
-    --color-surface: #13252f;
+    /*
+     * The body took the lighter tone the header had before Ben asked for an
+     * always-dark header (vision, Theme). Cards sit one step lighter again so
+     * they still read as cards, and the border follows so the edge shows.
+     */
+    --color-bg: #13252f;
+    --color-surface: #1b3341;
     --color-surface-sunken: #0e1d27;
-    --color-border: #2a4352;
+    --color-border: #34505f;
     --color-border-strong: #6f8c9f;
     --color-text: #e9f2f7;
     --color-text-muted: #a8bcc9;
@@ -221,8 +252,17 @@ ol {
   transform: translateY(-200%);
 }
 
+/*
+ * It pops up over the top of the page, which is the dark header once logged
+ * in; the page's own focus colour is the same blue as the link's fill in the
+ * light theme and would vanish there, so it uses the header's ring. The dark
+ * halo (as wide as the ring plus its 2px offset) keeps that pale ring visible
+ * on the pale page of the logged-out screens too.
+ */
 .skip-link:focus-visible {
   transform: none;
+  outline-color: var(--color-header-focus);
+  box-shadow: 0 0 0 calc(var(--focus-ring-width) + 2px) var(--color-header-bg);
 }
 
 /* Text for screen readers only. */

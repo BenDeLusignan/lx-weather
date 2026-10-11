@@ -38,7 +38,11 @@
   background: var(--color-surface-sunken);
 }
 
-/* The header's Home and Account: present on every screen, so they stay calm. */
+/*
+ * The header's site-name and Account links: present on every screen, so they
+ * stay calm. These colours suit a light page; the header re-colours them for
+ * its dark band (site-header.module.css).
+ */
 .quiet {
   background: transparent;
   color: var(--color-link);

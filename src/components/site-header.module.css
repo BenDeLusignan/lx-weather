@@ -1,6 +1,8 @@
+/* A dark band in both themes (vision, Theme > Team conventions 10). */
 .header {
-  border-bottom: 1px solid var(--color-border);
-  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-header-border);
+  background: var(--color-header-bg);
+  color: var(--color-header-text);
 }
 
 .nav {
@@ -11,6 +13,26 @@
   max-width: var(--content-width);
   margin-inline: auto;
   padding: var(--space-1) var(--space-3);
+}
+
+/*
+ * The quiet Button's colours (link blue, a pale hover) are made for a light
+ * page, so on the dark band they are re-coloured here, only for the header's
+ * links, rather than changing the shared Button. `.nav a` is more specific
+ * than the button's own classes, so these win without !important.
+ * nowrap: "LX Tennis Weather" must stay on one line beside Account at 360px.
+ */
+.nav a {
+  color: var(--color-header-text);
+  white-space: nowrap;
+}
+
+.nav a:hover {
+  background: var(--color-header-hover);
+}
+
+.nav a:focus-visible {
+  outline-color: var(--color-header-focus);
 }
 
 /* Breakpoint 48rem: see vision.md "Theme". The header lines up with the page's padding. */
