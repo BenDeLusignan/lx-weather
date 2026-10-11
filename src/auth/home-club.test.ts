@@ -16,7 +16,7 @@ async function newUser(email: string, homeClubId = "omagh"): Promise<User> {
   const created = await createUser({ email, passwordHash: await hashPassword("correct-horse-battery"), homeClubId });
   assert.equal(created.result, "created");
   if (created.result !== "created") throw new Error("not created");
-  return { id: created.user.id, email, homeClubId };
+  return { id: created.user.id, email, homeClubId, preferences: created.user.preferences };
 }
 
 const club = (id: string) => {

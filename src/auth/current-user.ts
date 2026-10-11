@@ -21,5 +21,5 @@ export const getCurrentUser = cache(async (): Promise<User | null> => {
   const user = await getUserCredentialsById(session.sub);
   // A deleted user, or a password changed since this session started.
   if (!user || passwordFingerprint(user.passwordHash) !== session.pwd) return null;
-  return { id: user.id, email: user.email, homeClubId: user.homeClubId };
+  return { id: user.id, email: user.email, homeClubId: user.homeClubId, preferences: user.preferences };
 });

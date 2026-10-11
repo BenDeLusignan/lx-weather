@@ -7,6 +7,7 @@ import { lockoutWaitMinutes } from "@/data/attempt-rules";
 import { EMAIL_MAX_LENGTH, PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH } from "@/data/limits";
 import { createUser, getUserCredentialsByEmail, setHomeClub, type User } from "@/data/users";
 import { parseEmail } from "@/forms/fields";
+import type { ThemeChoice } from "@/preferences/preferences";
 
 /**
  * What each Server Action in `src/auth/actions.ts` does, given the posted
@@ -31,6 +32,8 @@ export interface AttemptContext {
 export interface SessionToStart {
   id: number;
   passwordHash: string;
+  /** Their stored theme, so the device's theme cookie matches the account it is now logged in to. */
+  theme: ThemeChoice;
 }
 
 export interface SubmitResult {
@@ -112,7 +115,7 @@ export async function submitLogin(formData: FormData, context: AttemptContext): 
   if (!user || !passwordMatches) return { redirect: "/?failed=1" };
 
   await settle(gate.reservation);
-  return { redirect: "/", session: { id: user.id, passwordHash: user.passwordHash } };
+  return { redirect: "/", session: { id: user.id, passwordHash: user.passwordHash, theme: user.preferences.theme } };
 }
 
 /** The refusal codes `/signup?error=` can carry, each with its own message on the page. */
@@ -157,7 +160,10 @@ export async function submitSignUp(formData: FormData, context: AttemptContext):
   if (created.result === "email-used") return signUpRefused("failed");
 
   await settle(gate.reservation);
-  return { redirect: "/", session: { id: created.user.id, passwordHash } };
+  return {
+    redirect: "/",
+    session: { id: created.user.id, passwordHash, theme: created.user.preferences.theme },
+  };
 }
 
 /** The refusal codes `/account?error=` can carry. */

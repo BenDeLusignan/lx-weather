@@ -48,7 +48,7 @@ npm run dev              # dev server at http://localhost:3000
 npm run build            # production build
 npm run start            # serve the production build
 npm run lint             # ESLint
-npm test                 # tests (tsx --test): accounts, the login limiter, sessions, home club, club list, display formatting, the forecast engine. Uses throwaway databases, never local.db; no network
+npm test                 # tests (tsx --test): accounts, the login limiter, sessions, home club, your settings (theme, days, hours), club list, display formatting, the forecast engine. Uses throwaway databases, never local.db; no network
 npx tsc --noEmit         # type check
 npm run db:generate      # after editing src/db/schema.ts: write the SQL migration into drizzle/
 npm run db:migrate       # apply pending migrations in drizzle/ to DATABASE_URL
@@ -64,7 +64,7 @@ npm run forecast -- <latitude> <longitude>   # live week for any point
 | `/signup` | Email, password (12+ characters), home club |
 | `/away` | The other clubs, alphabetical |
 | `/away/[clubId]` | The same week screen for that club |
-| `/account` | Email, change home club, log out |
+| `/account` | Email, change home club, light or dark, which days and hours you see, log out |
 
 ## Gotchas
 

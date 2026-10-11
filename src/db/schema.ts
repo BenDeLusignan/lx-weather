@@ -31,6 +31,17 @@ export const user = sqliteTable(
     createdAt: integer("created_at", { mode: "timestamp" })
       .notNull()
       .default(sql`(unixepoch())`),
+    /**
+     * The user's own settings (`src/preferences/preferences.ts` explains the
+     * bit layout). The defaults are how the site worked before these existed,
+     * so an existing row reads as: follow the device, every day, every hour.
+     * `theme` is 'system' | 'light' | 'dark'; `days` is a Monday-first bitmask
+     * of the weekdays to show; `hours` a bitmask of the twelve blocks (10:00
+     * to 21:00) to show.
+     */
+    theme: text("theme").notNull().default("system"),
+    days: integer("days").notNull().default(127),
+    hours: integer("hours").notNull().default(4095),
   },
   (table) => [
     // The app stores `trim(lower(email))`; these pin it against a raw insert,
@@ -39,6 +50,13 @@ export const user = sqliteTable(
     // Same cap as EMAIL_MAX_LENGTH in src/data/limits.ts.
     check("user_email_length", sql`length(${table.email}) BETWEEN 3 AND 254`),
     check("user_home_club_not_blank", sql`length(${table.homeClubId}) > 0`),
+    // At least one day and one hour, and no bit outside the week (7 bits: 127)
+    // or the twelve hours (12 bits: 4095). Pinned to the constants in
+    // src/preferences/preferences.ts by a test; the schema is written in
+    // plain numbers because drizzle-kit loads this file without the `@/` alias.
+    check("user_theme_valid", sql`${table.theme} IN ('system', 'light', 'dark')`),
+    check("user_days_valid", sql`${table.days} BETWEEN 1 AND 127`),
+    check("user_hours_valid", sql`${table.hours} BETWEEN 1 AND 4095`),
   ],
 );
 

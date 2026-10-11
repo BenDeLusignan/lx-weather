@@ -22,5 +22,5 @@ async function Home({ searchParams }: Pick<PageProps<"/">, "searchParams">) {
     const { failed, locked } = await searchParams;
     return <LoginForm failed={failed === "1"} locked={locked} />;
   }
-  return <ClubWeather club={homeClubOrChoose(user)} home />;
+  return <ClubWeather club={homeClubOrChoose(user)} home preferences={user.preferences} />;
 }

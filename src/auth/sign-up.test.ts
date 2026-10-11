@@ -39,7 +39,7 @@ test("sign-up creates the user with a hashed password and a normalised email, an
   assert.ok(!(await verifyPassword("not-the-password-0", row.passwordHash)));
 
   // The session to start is for this user, under this hash.
-  assert.deepEqual(result.session, { id: row.id, passwordHash: row.passwordHash });
+  assert.deepEqual(result.session, { id: row.id, passwordHash: row.passwordHash, theme: "system" });
 });
 
 test("a duplicate email is refused, whatever its case or spacing, with the same generic flag", async () => {

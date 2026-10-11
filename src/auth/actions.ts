@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { clientIp } from "@/auth/client-ip";
 import { getCurrentUser } from "@/auth/current-user";
 import { endSession, startSession } from "@/auth/session";
+import { setThemeCookie } from "@/preferences/theme-cookie";
 import { submitHomeClubChange, submitLogin, submitSignUp, type SubmitResult } from "@/auth/submit";
 
 // Every action ends in redirect(), never by returning to render the page. A
@@ -21,7 +22,11 @@ async function attemptContext() {
 // The cookie can only be set from an action, so a submit function returns
 // what to sign rather than signing it itself.
 async function finish(result: SubmitResult): Promise<never> {
-  if (result.session) await startSession(result.session);
+  if (result.session) {
+    await startSession(result.session);
+    // The device's theme follows whoever just logged in (see theme-cookie.ts).
+    await setThemeCookie(result.session.theme);
+  }
   redirect(result.redirect);
 }
 

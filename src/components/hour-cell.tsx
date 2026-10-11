@@ -30,9 +30,23 @@ const TONE = { green: "good", yellow: "passable", red: "unlikely" } as const;
  * `name="hour"` makes the cells one group, so opening an hour closes the one
  * that was open (a browser without that support just lets several open).
  * Tapping the open cell again closes it.
+ *
+ * `position` is the hour's place among the user's `hourCount` chosen hours (0
+ * is the first): it sets the grid column, so a chosen hour is in the same
+ * column on every day.
  */
-export function HourCell({ block, dayHeading }: { block: Block; dayHeading: string }) {
-  const columns = gridColumns(block.startHour);
+export function HourCell({
+  block,
+  dayHeading,
+  position,
+  hourCount,
+}: {
+  block: Block;
+  dayHeading: string;
+  position: number;
+  hourCount: number;
+}) {
+  const columns = gridColumns(position, hourCount);
   const rain = block.rainChancePercent.value;
   const windMph = block.wind.mph;
 

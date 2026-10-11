@@ -49,10 +49,10 @@
   height: 1.25rem;
 }
 
-/* The same columns as the real strip (day-strip.module.css): 6, then 12 from 48rem. */
+/* The same columns as the real strip (day-strip.module.css): one row up to 6 hours, else two balanced rows, then one per chosen hour from 48rem. */
 .cells {
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: repeat(var(--columns-phone, 6), minmax(0, 12rem));
   gap: var(--space-1);
 }
 
@@ -67,7 +67,7 @@
   }
 
   .cells {
-    grid-template-columns: repeat(12, minmax(0, 1fr));
+    grid-template-columns: repeat(var(--columns-wide, 12), minmax(0, 12rem));
     gap: var(--space-2);
   }
 }

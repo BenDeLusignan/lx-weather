@@ -3,6 +3,15 @@ import { eq } from "drizzle-orm";
 import { isClubId } from "@/clubs/lookup";
 import { getDb } from "@/db/client";
 import { user } from "@/db/schema";
+import {
+  daysToMask,
+  hoursToMask,
+  isThemeChoice,
+  isValidDays,
+  isValidHours,
+  preferencesFromRow,
+  type Preferences,
+} from "@/preferences/preferences";
 
 /**
  * Accounts. The `...Credentials` readers return the password hash and exist
@@ -15,6 +24,8 @@ export interface User {
   email: string;
   /** A club id as stored. It may no longer be in `CLUBS`: check with `findClub`. */
   homeClubId: string;
+  /** Theme, days and hours: what a new account or an old row gets is `DEFAULT_PREFERENCES`. */
+  preferences: Preferences;
 }
 
 export interface UserCredentials extends User {
@@ -26,7 +37,25 @@ const credentialsColumns = {
   email: user.email,
   homeClubId: user.homeClubId,
   passwordHash: user.passwordHash,
+  theme: user.theme,
+  days: user.days,
+  hours: user.hours,
 };
+
+type CredentialsRow = Pick<
+  typeof user.$inferSelect,
+  "id" | "email" | "homeClubId" | "passwordHash" | "theme" | "days" | "hours"
+>;
+
+function toCredentials(row: CredentialsRow): UserCredentials {
+  return {
+    id: row.id,
+    email: row.email,
+    homeClubId: row.homeClubId,
+    passwordHash: row.passwordHash,
+    preferences: preferencesFromRow(row),
+  };
+}
 
 /** Emails are stored trimmed and lowercased, and matched the same way. */
 function normaliseEmail(email: string): string {
@@ -38,12 +67,12 @@ export async function getUserCredentialsByEmail(email: string): Promise<UserCred
     .select(credentialsColumns)
     .from(user)
     .where(eq(user.email, normaliseEmail(email)));
-  return row;
+  return row && toCredentials(row);
 }
 
 export async function getUserCredentialsById(id: number): Promise<UserCredentials | undefined> {
   const [row] = await getDb().select(credentialsColumns).from(user).where(eq(user.id, id));
-  return row;
+  return row && toCredentials(row);
 }
 
 /**
@@ -70,7 +99,7 @@ export async function createUser(input: {
       .values({ email, passwordHash: input.passwordHash, homeClubId: input.homeClubId })
       .returning(credentialsColumns);
     if (!created) throw new Error("Insert returned no row");
-    return { result: "created" as const, user: created };
+    return { result: "created" as const, user: toCredentials(created) };
   });
 }
 
@@ -88,5 +117,32 @@ export async function setHomeClub(
     .set({ homeClubId })
     .where(eq(user.id, userId))
     .returning({ id: user.id });
+  return updated.length > 0 ? "saved" : "not-found";
+}
+
+/**
+ * Changes some of a user's settings; only the parts given are written. Every
+ * part is re-checked here, at the write, whatever the caller did: an unknown
+ * theme, or an empty or out-of-range day or hour list, is refused and nothing
+ * is changed (the table's CHECKs are the last backstop).
+ */
+export async function updatePreferences(
+  userId: number,
+  changes: Partial<Preferences>,
+): Promise<"saved" | "invalid" | "not-found"> {
+  const { theme, days, hours } = changes;
+  if (theme !== undefined && !isThemeChoice(theme)) return "invalid";
+  if (days !== undefined && !isValidDays(days)) return "invalid";
+  if (hours !== undefined && !isValidHours(hours)) return "invalid";
+
+  const set = {
+    ...(theme !== undefined && { theme }),
+    ...(days !== undefined && { days: daysToMask(days) }),
+    ...(hours !== undefined && { hours: hoursToMask(hours) }),
+  };
+  // Nothing to write is not a save.
+  if (Object.keys(set).length === 0) return "invalid";
+
+  const updated = await getDb().update(user).set(set).where(eq(user.id, userId)).returning({ id: user.id });
   return updated.length > 0 ? "saved" : "not-found";
 }

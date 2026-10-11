@@ -8,6 +8,13 @@
       "when": 1791711480597,
       "tag": "0000_create_user_and_login_attempt",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1791725796862,
+      "tag": "0001_user_preferences",
+      "breakpoints": true
     }
   ]
 }

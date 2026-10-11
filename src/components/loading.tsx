@@ -1,3 +1,5 @@
+import { stripColumns } from "@/weather/format";
+import type { CSSProperties } from "react";
 import styles from "./loading.module.css";
 
 /**
@@ -22,18 +24,25 @@ export function PageLoading() {
 /**
  * The fallback for the forecast itself, which may have to be fetched: seven
  * days of grey cells in the shape of the real week, under a "Loading the
- * forecast" line. The club's name and buttons are already on screen.
+ * forecast" line. The club's name and buttons are already on screen. The
+ * counts are the user's chosen days and hours, so it has the shape of the week
+ * that will arrive (the week is always seven consecutive days, so a chosen
+ * number of weekdays is exactly that many days).
  */
-export function WeekLoading() {
+export function WeekLoading({ dayCount, hourCount }: { dayCount: number; hourCount: number }) {
+  const columns = stripColumns(hourCount);
   return (
     <div role="status">
       <p className="visually-hidden">Loading the forecast…</p>
       <ol aria-hidden="true" className={styles.week}>
-        {Array.from({ length: 7 }, (_, day) => (
+        {Array.from({ length: dayCount }, (_, day) => (
           <li key={day} className={styles.day}>
             <div className={`${styles.bar} ${styles.dayTitle}`} />
-            <div className={styles.cells}>
-              {Array.from({ length: 12 }, (_, hour) => (
+            <div
+              className={styles.cells}
+              style={{ "--columns-phone": columns.phone, "--columns-wide": columns.wide } as CSSProperties}
+            >
+              {Array.from({ length: hourCount }, (_, hour) => (
                 <div key={hour} className={styles.cell} />
               ))}
             </div>

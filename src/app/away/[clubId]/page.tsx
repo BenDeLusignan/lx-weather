@@ -48,5 +48,5 @@ async function AwayClub({ clubId }: { clubId: string }) {
 
   const club = findClub(clubId);
   if (!club) notFound();
-  return <ClubWeather club={club} home={false} />;
+  return <ClubWeather club={club} home={false} preferences={user.preferences} />;
 }

@@ -1,47 +1,71 @@
 /*
- * LX Weather: first look (Drage's proposal, awaiting Ben; see vision, Theme).
- * Calm and legible: a pale sky light theme and a deep night-sky dark theme
- * (chosen by prefers-color-scheme), one blue for everything you can press, and
- * the traffic lights as the only strong colours on the page.
+ * LX Weather: LX purple and pink, in a light and a dark theme (Ben's decision,
+ * see vision, Theme). Calm and legible: colours only from LX Tennis's synthwave
+ * palette, none of its glows, grid, sun or Orbitron. Pink is the one action
+ * colour (buttons), purple is for links and focus, and the traffic lights are
+ * the only strong non-purple colours on the page.
+ *
+ * Which theme applies (the contract with the Account page; see vision):
+ *   no data-theme on <html>   follow the device (prefers-color-scheme)
+ *   data-theme="light"        light, even on a dark device
+ *   data-theme="dark"         dark, even on a light device
+ * It is done with `color-scheme` plus `light-dark(light, dark)`: each token
+ * below is written ONCE as its light and dark value side by side, so the two
+ * can never drift apart. light-dark() needs Chrome 123, Safari 17.5 or
+ * Firefox 120 (2024) or newer.
  *
  * Every colour, size and space the site uses is defined here once, as a
  * semantic token. Components use the tokens, never a hex value, so the whole
- * look can be re-tuned in this block. There is no separate palette layer: each
- * token is written twice (light, then dark) and that is the whole theme. The
+ * look can be re-tuned in this block. There is no separate palette layer. The
  * exceptions are the mark and header tokens, which are the same in both themes
- * and so are written once.
+ * and so are plain values.
  *
  * Contrast, WCAG 2.x (AA: 4.5:1 for text, 3:1 for icons and control edges),
  * measured with the WCAG relative-luminance formula. Light theme, then dark:
  *
- *   text on bg / surface / surface-sunken     14.7 / 16.3 / 13.5     13.9 / 11.6 / 15.1
- *   text-muted on bg / surface / sunken        6.7 /  7.4 /  6.1      8.0 /  6.7 /  8.8
- *   link on bg / surface / sunken              6.6 /  7.4 /  6.1      8.3 /  6.9 /  9.0
- *   error on bg / surface / sunken             6.8 /  7.6 /  6.3      7.7 /  6.5 /  8.4
- *   success on bg / surface / sunken           6.0 /  6.7 /  5.5      9.2 /  7.7 / 10.1
- *   button-text on button-bg                   7.4                    8.8
- *   focus on bg / surface (needs 3)            6.6 /  7.4             8.3 /  6.9
- *   border-strong on bg / surface (needs 3)    3.6 /  4.0             4.5 /  3.7
+ *   text on bg / surface / surface-sunken     15.6 / 17.6 / 13.8     15.6 / 13.5 / 16.8
+ *   text-muted on bg / surface / sunken        7.4 /  8.3 /  6.6      9.9 /  8.6 / 10.7
+ *   link on bg / surface / sunken              8.0 /  9.0 /  7.1      9.2 /  7.9 /  9.9
+ *   error on bg / surface / sunken             5.8 /  6.6 /  5.2      8.5 /  7.3 /  9.1
+ *   success on bg / surface / sunken           5.9 /  6.7 /  5.3     10.1 /  8.7 / 10.9
+ *   button-text on button-bg                   5.7                    5.7
+ *   button-text on the hover fill (85% fill)   7.0                    6.4
+ *   button-bg on bg / surface (needs 3)        5.1 /  5.7             5.4 /  4.6
+ *   focus on bg / surface / sunken (needs 3)   8.0 /  9.0 /  7.1     10.8 /  9.3 / 11.6
+ *   border-strong on bg / surface (needs 3)    4.2 /  4.8             5.5 /  4.7
+ *   border on bg / surface (a divider, the fills already differ)
+ *                                              1.6 /  1.8             1.9 /  1.6
  *
- * The header (one dark band in both themes, so one set of numbers):
- *   header-text on header-bg / header-hover    16.0 / 11.6
- *   header-focus on header-bg / header-hover (needs 3)    9.5 / 6.9
- *   header-border on header-bg (a decorative divider: the fills already differ)   2.1
- *   The brand mark's tile (#0a5a8c) on header-bg is 2.5, under 3, but the tile
- *   is only the mark's backdrop: the white cloud (18.1) and the lime ball (13.8)
- *   carry the picture, and it is decorative (aria-hidden, the words beside it
- *   are the name), so WCAG 1.4.11 doesn't apply.
- *   In the dark theme the header is 1.15 against the body: a quiet step (the
- *   swap Ben asked for), not a text pairing.
+ * The header (one dark purple band in both themes, so one set of numbers):
+ *   header-text on header-bg / header-hover    17.3 / 13.9
+ *   header-focus on header-bg / header-hover (needs 3)    12.0 / 9.6
+ *   header-border on header-bg (a decorative divider)     1.7
+ *   header-bg on the light page 17.0; on the dark page 1.1, a quiet step (the
+ *   swap Ben asked for), held by the header's divider, not a text pairing.
+ *   The skip link's focus ring is header-focus with a header-bg halo, so it
+ *   reads on the header (12.0) and on a pale logged-out page (halo on page 17.0).
+ *
+ * The brand mark (the same in both themes): its tile on header-bg is 3.4, the
+ * white cloud on the tile 5.7 and the lime ball on the tile 4.3, all over 3.
  *
  * Traffic lights (a cell's text on its own fill; the icon's fill on that fill,
- * needs 3):
+ * needs 3; the card's open ring is --color-text, which is 14 to 15 on every
+ * light cell in the light theme and 11 to 12 in the dark):
  *   good      text 8.8 / icon 4.4        text 10.1 / icon 5.6
  *   passable  text 8.9 / icon 2.1 *      text 10.1 / icon 7.0
- *   unlikely  text 8.3 / icon 5.0        text 10.4 / icon 5.8
- *   unknown   text 8.1 / icon 4.7        text  8.3 / icon 5.3
+ *   unlikely  text 8.7 / icon 5.2        text  9.4 / icon 5.1
+ *   unknown   text 9.3 / icon 4.6        text  8.0 / icon 5.0
  *   * Amber is light by nature, so the passable triangle is also outlined in the
  *     dark text colour (8.9:1); its shape never depends on the amber fill.
+ * A Notice's left edge is the passable (warning) or unlikely (problem) icon
+ * colour on the card: 2.4 / 6.5 light, 8.3 / 5.9 dark. The light warning edge
+ * is under 3, but it only tints the edge: the Notice's words carry the meaning
+ * and the card has its own border, so nothing depends on that colour.
+ *
+ * Red is kept apart from the pink action colour by hue as well as by shape and
+ * word: the button pink is hue 324 (light) and 326 (dark), the "unlikely" red
+ * and the error red are 3 to 6, and the unlikely fill is an orange-leaning red
+ * (hue 12 light, 9 dark) rather than a rose. Pink is magenta, red is coral.
  *
  * Every light is also a different shape (circle with a tick, triangle with an
  * exclamation mark, square with a cross, dashed ring with a question mark) and
@@ -52,66 +76,71 @@
  * Breakpoints (custom properties can't go in @media, so they are written in
  * vision.md "Theme"): mobile-first, 48rem is the only one the site uses.
  */
+
 :root {
+  /* Follow the device unless <html data-theme> says otherwise (below). */
   color-scheme: light dark;
 
-  /* Surfaces and text */
-  --color-bg: #eef4f8;
-  --color-surface: #ffffff;
-  --color-surface-sunken: #e1ebf2;
-  --color-border: #b7c7d3;
+  /* Surfaces and text: light-dark(light value, dark value) */
+  --color-bg: light-dark(#f5efff, #1f0b4d);
+  --color-surface: light-dark(#ffffff, #2c1468);
+  --color-surface-sunken: light-dark(#e9e0fa, #160540);
+  --color-border: light-dark(#c9b8ee, #4d34a0);
   /* The edge of a control (input, select): needs 3:1 to be seen. */
-  --color-border-strong: #6a8396;
-  --color-text: #10222e;
-  --color-text-muted: #43586a;
-  --color-link: #0a5a8c;
-  --color-focus: #0a5a8c;
-  --color-error: #a3201a;
-  --color-success: #176a31;
-  --color-button-bg: #0a5a8c;
-  --color-button-text: #ffffff;
-  --shadow-raised: 0 0.25rem 1.25rem rgb(16 34 46 / 0.18), 0 0 0 1px rgb(16 34 46 / 0.08);
+  --color-border-strong: light-dark(#7d62c4, #9a82e0);
+  --color-text: light-dark(#1e0c45, #f7f1ff);
+  --color-text-muted: light-dark(#55447f, #cbbcf5);
+  /* Purple for links and focus; pink (below) is kept for the main action. */
+  --color-link: light-dark(#5b21b6, #d2adff);
+  --color-focus: light-dark(#5b21b6, #2de2e6);
+  --color-error: light-dark(#b42318, #ff9a8f);
+  --color-success: light-dark(#176a31, #7fd99b);
+  --color-button-bg: light-dark(#c2127c, #ff3cac);
+  --color-button-text: light-dark(#ffffff, #1a0640);
+  --shadow-raised:
+    0 0.25rem 1.25rem light-dark(rgb(30 12 69 / 0.18), rgb(0 0 0 / 0.5)),
+    0 0 0 1px light-dark(rgb(30 12 69 / 0.08), rgb(255 255 255 / 0.08));
 
   /*
    * The brand mark carries its own background, so it is the same in both
    * themes. src/app/icon.svg hard-codes these three (see vision.md "Theme").
    */
-  --color-mark-bg: #0a5a8c;
+  --color-mark-bg: #7c3aed;
   --color-mark-cloud: #ffffff;
   --color-mark-ball: #d9ec3f;
 
   /*
-   * The header is a dark band in both themes (Ben: "the header should always
-   * be dark"), so these are written once, like the mark. In the dark theme
-   * it is darker than the body (--color-bg), in the light theme it is the
+   * The header is a deep purple band in both themes (Ben: "the header should
+   * always be dark"), so these are plain values, like the mark. In the dark
+   * theme it is darker than the body (--color-bg), in the light theme it is the
    * only dark thing on the page. `hover` is the quiet buttons' hover fill and
    * `focus` the keyboard ring; both are scoped to the header (site-header.module.css).
    */
-  --color-header-bg: #0b1721;
-  --color-header-text: #e9f2f7;
-  --color-header-border: #34505f;
-  --color-header-hover: #1b3341;
-  --color-header-focus: #7cc4f0;
+  --color-header-bg: #130435;
+  --color-header-text: #f7f1ff;
+  --color-header-border: #3d2490;
+  --color-header-hover: #2a1262;
+  --color-header-focus: #2de2e6;
 
   /*
    * The traffic lights (vision, Core flow 3). Per light: `bg` is a cell's fill,
    * `fg` its text, `strong` the icon's fill, `glyph` the mark inside the icon.
    */
-  --light-good-bg: #d9f2e1;
-  --light-good-fg: #0b4a21;
-  --light-good-strong: #1c7c3a;
-  --light-good-glyph: #ffffff;
-  --light-passable-bg: #fdeec2;
-  --light-passable-fg: #5a3a00;
-  --light-passable-strong: #e29a00;
-  --light-passable-glyph: #3d2600;
-  --light-unlikely-bg: #fbdad7;
-  --light-unlikely-fg: #7a1510;
-  --light-unlikely-strong: #b3261e;
-  --light-unlikely-glyph: #ffffff;
-  --light-unknown-bg: #e4ecf1;
-  --light-unknown-fg: #364654;
-  --light-unknown-strong: #566a7a;
+  --light-good-bg: light-dark(#d9f2e1, #133b23);
+  --light-good-fg: light-dark(#0b4a21, #c2f2d1);
+  --light-good-strong: light-dark(#1c7c3a, #4cc477);
+  --light-good-glyph: light-dark(#ffffff, #06210f);
+  --light-passable-bg: light-dark(#fdeec2, #40310a);
+  --light-passable-fg: light-dark(#5a3a00, #ffe3a0);
+  --light-passable-strong: light-dark(#e29a00, #f5b72e);
+  --light-passable-glyph: light-dark(#3d2600, #3d2600);
+  --light-unlikely-bg: light-dark(#fce0d9, #5c1d12);
+  --light-unlikely-fg: light-dark(#7a1510, #ffd2cc);
+  --light-unlikely-strong: light-dark(#b3261e, #ff7b71);
+  --light-unlikely-glyph: light-dark(#ffffff, #2a0705);
+  --light-unknown-bg: light-dark(#e8e3f3, #352a6b);
+  --light-unknown-fg: light-dark(#3b3358, #d4cbf2);
+  --light-unknown-strong: light-dark(#6a6086, #a99ddb);
 
   /* Type: the system font, so nothing is downloaded and it looks at home on every device. */
   --font-body: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -140,44 +169,17 @@
   --duration-fast: 150ms;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    /*
-     * The body took the lighter tone the header had before Ben asked for an
-     * always-dark header (vision, Theme). Cards sit one step lighter again so
-     * they still read as cards, and the border follows so the edge shows.
-     */
-    --color-bg: #13252f;
-    --color-surface: #1b3341;
-    --color-surface-sunken: #0e1d27;
-    --color-border: #34505f;
-    --color-border-strong: #6f8c9f;
-    --color-text: #e9f2f7;
-    --color-text-muted: #a8bcc9;
-    --color-link: #7cc4f0;
-    --color-focus: #7cc4f0;
-    --color-error: #ff9a92;
-    --color-success: #7fd99b;
-    --color-button-bg: #7cc4f0;
-    --color-button-text: #06202f;
-    --shadow-raised: 0 0.25rem 1.25rem rgb(0 0 0 / 0.5), 0 0 0 1px rgb(255 255 255 / 0.08);
+/*
+ * The user's choice from the Account page, set on <html> as data-theme. With
+ * no attribute the :root rule above stands and light-dark() follows the device.
+ * It also makes the browser's own controls (select, scrollbars) match.
+ */
+:root[data-theme="light"] {
+  color-scheme: light;
+}
 
-    --light-good-bg: #133b23;
-    --light-good-fg: #c2f2d1;
-    --light-good-strong: #4cc477;
-    --light-good-glyph: #06210f;
-    --light-passable-bg: #40310a;
-    --light-passable-fg: #ffe3a0;
-    --light-passable-strong: #f5b72e;
-    --light-passable-glyph: #3d2600;
-    --light-unlikely-bg: #4a191c;
-    --light-unlikely-fg: #ffcfca;
-    --light-unlikely-strong: #ff7b71;
-    --light-unlikely-glyph: #2a0705;
-    --light-unknown-bg: #1b2e3a;
-    --light-unknown-fg: #b9cad5;
-    --light-unknown-strong: #8aa3b4;
-  }
+:root[data-theme="dark"] {
+  color-scheme: dark;
 }
 
 *,
@@ -254,8 +256,8 @@ ol {
 
 /*
  * It pops up over the top of the page, which is the dark header once logged
- * in; the page's own focus colour is the same blue as the link's fill in the
- * light theme and would vanish there, so it uses the header's ring. The dark
+ * in; the page's own focus colour in the light theme is a deep purple that
+ * would nearly vanish on it, so it uses the header's ring. The dark
  * halo (as wide as the ring plus its 2px offset) keeps that pale ring visible
  * on the pale page of the logged-out screens too.
  */

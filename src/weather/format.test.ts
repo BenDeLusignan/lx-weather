@@ -13,6 +13,7 @@ import {
   providerCountNote,
   spokenRainChance,
   spokenWindSpeed,
+  stripColumns,
   timeRange,
   unknownReason,
 } from "./format";
@@ -74,11 +75,32 @@ test("a block's time range is its hour, to the next", () => {
   assert.equal(timeRange(21), "21:00–22:00");
 });
 
-test("an hour sits in the same column on every day: two rows of six on a phone, one row of twelve on a wide screen", () => {
-  assert.deepEqual(gridColumns(10), { phone: 1, wide: 1 });
-  assert.deepEqual(gridColumns(15), { phone: 6, wide: 6 });
-  assert.deepEqual(gridColumns(16), { phone: 1, wide: 7 }, "16:00 starts the phone's second row");
-  assert.deepEqual(gridColumns(21), { phone: 6, wide: 12 });
+test("with every hour chosen an hour sits in the same column on every day: two rows of six on a phone, one row of twelve on a wide screen", () => {
+  // Position is the hour's place among the chosen hours: 10:00 is 0 ... 21:00 is 11.
+  assert.deepEqual(gridColumns(0, 12), { phone: 1, wide: 1 });
+  assert.deepEqual(gridColumns(5, 12), { phone: 6, wide: 6 });
+  assert.deepEqual(gridColumns(6, 12), { phone: 1, wide: 7 }, "the seventh hour starts the phone's second row");
+  assert.deepEqual(gridColumns(11, 12), { phone: 6, wide: 12 });
+  assert.deepEqual(stripColumns(12), { phone: 6, wide: 12 }, "all twelve: the strip as it always was");
+});
+
+test("fewer chosen hours make fewer, wider columns, never a row of empty ones", () => {
+  assert.deepEqual(stripColumns(1), { phone: 1, wide: 1 });
+  assert.deepEqual(stripColumns(4), { phone: 4, wide: 4 });
+  assert.deepEqual(stripColumns(6), { phone: 6, wide: 6 }, "six still fit one phone row");
+});
+
+test("more than six hours split into two balanced phone rows of ceil(n / 2), with no orphan cell", () => {
+  assert.deepEqual(stripColumns(7), { phone: 4, wide: 7 }, "7 is 4 + 3");
+  assert.deepEqual(stripColumns(8), { phone: 4, wide: 8 });
+  assert.deepEqual(stripColumns(9), { phone: 5, wide: 9 });
+  assert.deepEqual(stripColumns(10), { phone: 5, wide: 10 });
+  assert.deepEqual(stripColumns(11), { phone: 6, wide: 11 }, "11 is 6 + 5");
+  // 7 chosen hours: positions 0-3 fill row one, 4-6 start row two in columns 1-3.
+  assert.deepEqual(gridColumns(3, 7), { phone: 4, wide: 4 });
+  assert.deepEqual(gridColumns(4, 7), { phone: 1, wide: 5 });
+  assert.deepEqual(gridColumns(6, 7), { phone: 3, wide: 7 });
+  assert.deepEqual(gridColumns(10, 11), { phone: 5, wide: 11 });
 });
 
 test("wind comes as two parts so a narrow table can stack mph over km/h, and as one string everywhere else", () => {
