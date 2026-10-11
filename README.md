@@ -8,7 +8,7 @@ A weather app for tennis players in Northern Ireland. It combines the forecasts 
 
 - [Next.js](https://nextjs.org) 16 (App Router, Cache Components) + TypeScript, React 19
 - Plain CSS / CSS Modules, no Tailwind. Every colour is a semantic token in `src/app/globals.css`, with a light and a dark value (the look is [in the vision](docs/vision.md), "Theme")
-- SQLite through [Drizzle ORM](https://orm.drizzle.team) and `@libsql/client`: a local file in development, [Turso](https://turso.tech) later by changing `DATABASE_URL`
+- SQLite through [Drizzle ORM](https://orm.drizzle.team) and `@libsql/client`: a local file in development, [Turso](https://turso.tech) when hosted on Vercel, chosen by `DATABASE_URL`
 - Forecasts from [Open-Meteo](https://open-meteo.com) (five models, no key, free non-commercial tier), cached on the server for up to an hour per club. The site credits Open-Meteo (CC BY 4.0) and the UK Met Office model data (CC BY-SA 4.0); see the vision for the open licence question
 
 ## Setup
@@ -40,6 +40,20 @@ Requires Node.js 20.9 or newer.
    ```
 
 4. **Run it:** `npm run dev`, then open http://localhost:3000 and sign up.
+
+## Deploying (Vercel + Turso)
+
+Live at https://lx-weather.vercel.app. A deployed site needs three environment variables in the Vercel project (Settings, Environment Variables), for Production and Preview:
+
+| Variable | Value |
+| --- | --- |
+| `DATABASE_URL` | The Turso database's `libsql://…turso.io` URL. A `file:` URL can't work on Vercel (its disk is read-only) |
+| `DATABASE_AUTH_TOKEN` | The Turso auth token |
+| `SESSION_SECRET` | 32+ random characters, a different one per environment is fine |
+
+With any of them missing, the pages load but **sign-up and log-in crash** with "This page couldn't load". The Turso integration on Vercel adds `TURSO_DATABASE_URL` and `TURSO_AUTH_TOKEN`, which the app doesn't read: add `DATABASE_URL` and `DATABASE_AUTH_TOKEN` with the same values. Preview deployments share the one database, so a sign-up on a preview URL is a real account.
+
+**Migrations don't run on deploy.** After adding a migration in `drizzle/`, run `npm run db:migrate` yourself with `DATABASE_URL` and `DATABASE_AUTH_TOKEN` set in the shell to the Turso values (they override `.env.local`), then deploy.
 
 ## Commands
 
