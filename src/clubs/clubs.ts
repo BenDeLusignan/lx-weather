@@ -4,15 +4,16 @@
  * Source (vision: "The clubs"): Ben's names, each searched on Google Maps as
  * "<name> tennis club" on 11 Oct 2026. `listedAs`, `address` and the
  * coordinates are what Google Maps showed for the place it found (coordinates
- * are the place's pin). Where that search did not land on the club itself,
- * `locationNote` says what was used instead and why.
+ * are the place's pin). Where that search did not land on the club itself, or
+ * needed rewording to find the right town, `locationNote` says what was done
+ * and why.
  *
  * NOT here yet: Belfast. Ben says it is about five clubs and has not said
  * which; the candidates are in the vision's Open questions. Adding Belfast is
  * adding its clubs to this list, nothing else.
  */
 export interface Club {
-  /** Stable key, used in addresses and in the database later. Never rename. */
+  /** Stable key, used in URLs and in the database later. Never rename. */
   id: string;
   /** The name as Ben wrote it. */
   name: string;
@@ -21,7 +22,7 @@ export interface Club {
   address: string;
   latitude: number;
   longitude: number;
-  /** Set only when the Google Maps result needed a check or a substitute. */
+  /** Set only when the Google Maps result needed a check, a substitute or a reworded search. */
   locationNote?: string;
 }
 

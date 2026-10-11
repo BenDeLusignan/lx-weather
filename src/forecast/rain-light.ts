@@ -7,12 +7,11 @@ export type RainLight = "green" | "yellow" | "red";
  * Ben did not say which side exactly 40 and exactly 70 fall on. Both being
  * yellow is the team's reading, not Ben's words.
  *
- * `null` (no provider gave a chance) gives `null`: never guess a colour.
+ * The light follows the WHOLE-NUMBER % shown on screen (the team's reading),
+ * so the number and the colour never disagree: 70.4 shows as 70 and is
+ * yellow, 70.5 shows as 71 and is red. That is why this rounds first.
  *
- * The chance is rounded to a whole % first, exactly as it is shown to the user,
- * so the number on screen and the colour can never disagree (70.4 shows as
- * "70%" and is yellow; 70.5 shows as "71%" and is red). Callers pass the
- * unrounded figure and need not round for the light.
+ * `null` (no provider gave a chance) gives `null`: never guess a colour.
  */
 export function rainLight(chancePercent: number | null): RainLight | null {
   if (chancePercent === null || !Number.isFinite(chancePercent)) return null;

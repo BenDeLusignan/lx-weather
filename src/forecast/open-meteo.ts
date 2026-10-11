@@ -1,4 +1,4 @@
-// One Open-Meteo call for all five providers' hourly forecast.
+// One Open-Meteo call for all five providers' hourly forecast (7 days by default).
 //
 // Response shape (checked live on 11 Oct 2026): because we send several `models`,
 // every hourly variable comes back once per model with the model id as a suffix,
@@ -15,7 +15,7 @@
 import { PROVIDERS, type ProviderId } from "./providers";
 
 const ENDPOINT = "https://api.open-meteo.com/v1/forecast";
-const DEFAULT_DAYS = 14;
+const DEFAULT_DAYS = 7; // one week (vision, Core flow 1)
 const MAX_DAYS = 16; // Open-Meteo's limit
 const TIMEOUT_MS = 10_000;
 
@@ -74,7 +74,7 @@ export interface HourlyForecast {
 export interface FetchHourlyForecastOptions {
   latitude: number;
   longitude: number;
-  /** 1 to 16; default 14. */
+  /** 1 to 16; default 7 (one week). */
   days?: number;
   /** Injected in tests; defaults to the global `fetch`. */
   fetchImpl?: typeof fetch;

@@ -98,13 +98,14 @@ This is the list of places "where we might be playing". Names are as Ben wrote t
 
 ## Current state
 
-Only the forecast engine exists: TypeScript in `src/forecast/`, no Next.js, database, UI, clubs or users yet.
+The forecast engine and the club list exist: TypeScript in `src/forecast/` and `src/clubs/`. The club list has 17 of the 18 clubs: Belfast is missing until Ben picks its clubs (see Open questions). There is no Next.js app, database, UI or users yet.
 
-- It takes a latitude and longitude and makes one Open-Meteo call for the five providers (14 days of hourly temperature, chance of rain and wind). `aggregate.ts` gives each hour its aggregate (Team convention 3) with how many providers contributed and each provider's own value; `rain-light.ts` gives the green/yellow/red light for a chance of rain.
-- A provider with no value for an hour is a gap (`null`) and is never filled. A provider with nothing at all is reported as unavailable. If the fetch fails it throws `ForecastFetchError`.
-- It does not turn hours into a day or a day icon (open question below), and has no wind or temperature light.
-- Run `npm run forecast -- <latitude> <longitude>` to see the next 24 hours live, and `npm test` for the tests.
-- **For whoever builds the UI on it:** hours are UTC instants, so group them into days in Europe/London, not UTC. A provider that doesn't reach that far ahead is a `null` in an hour's per-provider values, which looks the same as an outage (only a provider with nothing at all is in `unavailable`). If all five are unavailable the fetch still returns normally, so the empty state must check for that as well as catching `ForecastFetchError`.
+- `fetchHourlyForecast` takes a latitude and longitude and makes one Open-Meteo call for the five providers (7 days of hourly temperature, chance of rain and wind). `buildWeek` turns that into the week view's data: seven UK days (today plus six) of 08:00-20:00 hour blocks, each with the aggregate temperature, rain chance and wind (Team convention 3), how many providers each is built from, every provider's own value, the rain light, the wind light and the block's light (the worse of the two; unknown unless both are known or one is red).
+- A provider with no value is a gap (`null`) and is never filled; a block with no data is still returned, with `null` figures and a `null` light. A provider with nothing at all is listed in `unavailable`. If the fetch fails it throws `ForecastFetchError`.
+- Which hourly values feed a block is explained in `blocks.ts`: rain from the stamp that ends the block (Open-Meteo gives it for the preceding hour), temperature and wind as the mean of the stamps at its start and end.
+- It does not give a day one icon (open question below).
+- Run `npm run forecast -- <club id>` (or `<latitude> <longitude>`) to see the week live, and `npm test` for the tests.
+- **For whoever builds the UI on it:** nothing is rounded in the engine; round at display (whole % and mph and km/h, one decimal for °C). The lights already follow the whole numbers. A provider that doesn't reach that far ahead is a `null` in a block's per-provider values, which looks the same as an outage (only a provider with nothing at all is in `unavailable`). If all five are unavailable the fetch still returns normally, so the empty state must check for that as well as catching `ForecastFetchError`. A `null` light needs its own look (not green, not red).
 
 ## Open questions (Ben hasn't answered; don't decide these)
 
