@@ -106,6 +106,11 @@
  * opening an hour never moves the cells: the week stays where you left it.
  * The day section is the positioned ancestor (day-strip.module.css), so the
  * strip and its list must not become positioned themselves.
+ *
+ * max-height: only the last day sets --card-room (day-strip.module.css), the
+ * room it keeps under itself for the credit below the week; the card never
+ * outgrows it. Other days leave it unset, so `none`: no cap, they just cover
+ * what follows, as they always did.
  */
 .card {
   position: absolute;
@@ -115,6 +120,8 @@
   right: 0;
   margin-top: var(--space-2);
   padding: var(--space-4);
+  max-height: var(--card-room, none);
+  overflow-y: auto;
   border-radius: var(--radius);
   background: var(--color-surface);
   box-shadow: var(--shadow-raised);

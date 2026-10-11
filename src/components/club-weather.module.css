@@ -40,8 +40,16 @@
   gap: var(--space-2);
 }
 
-.credit {
+/* What decides the colour: a quiet line above the week. */
+.hint {
   margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+/* Last on the page: extra room above it so it reads as the page's footnote, not as part of the last day. */
+.credit {
+  margin: var(--space-6) 0 0;
   color: var(--color-text-muted);
   font-size: var(--font-size-sm);
 }

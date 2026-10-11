@@ -141,8 +141,3 @@ export function weekdayIndex(date: string): number {
   const sundayFirst = new Date(`${date}T12:00:00Z`).getUTCDay();
   return (sundayFirst + 6) % 7;
 }
-
-/** Whether these are the defaults, i.e. the week is shown unfiltered. */
-export function showsEverything(preferences: Pick<Preferences, "days" | "hours">): boolean {
-  return preferences.days.length === WEEKDAYS.length && preferences.hours.length === BLOCK_HOURS.length;
-}

@@ -1,13 +1,11 @@
-import Link from "next/link";
 import type { HourlyForecast } from "@/forecast/open-meteo";
 import { buildWeek } from "@/forecast/blocks";
 import { PROVIDERS, PROVIDER_TOTAL } from "@/forecast/providers";
-import { showsEverything, type Preferences } from "@/preferences/preferences";
+import type { Preferences } from "@/preferences/preferences";
 import { filterWeek } from "@/preferences/week-view";
 import { loadClubForecast } from "@/weather/forecast-cache";
 import styles from "./club-week.module.css";
 import { DayStrip } from "./day-strip";
-import { LightKey } from "./light-key";
 import { Notice } from "./notice";
 
 const CANT_LOAD = "The forecast can’t be loaded right now. Please try again in a few minutes.";
@@ -39,19 +37,16 @@ export async function ClubWeek({
   const week = filterWeek(buildWeek(load.forecast, { now: new Date() }), preferences);
   return (
     <div className={styles.week}>
-      <div className={styles.intro}>
-        <UnavailableProviders forecast={load.forecast} />
-        <LightKey />
-        <p className={styles.hint}>Tap an hour for its figures and what each provider says.</p>
-        {showsEverything(preferences) ? null : (
-          <p className={styles.hint}>
-            Showing only the days and hours you chose. Change them on your <Link href="/account">Account page</Link>.
-          </p>
-        )}
-      </div>
+      <UnavailableProviders forecast={load.forecast} />
       <div className={styles.days}>
-        {week.map((shown) => (
-          <DayStrip key={shown.day.date} clubId={clubId} shown={shown} hours={preferences.hours} />
+        {week.map((shown, i) => (
+          <DayStrip
+            key={shown.day.date}
+            clubId={clubId}
+            shown={shown}
+            hours={preferences.hours}
+            last={i === week.length - 1}
+          />
         ))}
       </div>
     </div>

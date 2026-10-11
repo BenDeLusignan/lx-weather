@@ -26,17 +26,18 @@ export async function SiteHeader() {
         <Button href="/" variant="quiet">
           <BrandMark />
           {/*
-            The words stay real text. The weights and sizes are CSS
-            (site-header.module.css, which also says why the wordmark must not
-            change on hover), and the space between the spans keeps the
-            accessible name "LX Tennis Weather".
+            The words stay real text, all one size and weight (Ben, 11 Oct
+            2026: "Tennis Weather the same size and style as LX"). On a phone
+            the two lines are stacked ("LX Tennis" over "Weather", site-header
+            .module.css says why); from 48rem they are one line. The space
+            between the spans keeps the accessible name "LX Tennis Weather".
           */}
           <span className={styles.wordmark}>
-            <span className={styles.lx}>LX</span> <span className={styles.name}>Tennis Weather</span>
+            <span className={styles.line}>LX Tennis</span> <span className={styles.line}>Weather</span>
           </span>
         </Button>
         <div className={styles.actions}>
-          <ThemeSwitch theme={user.preferences.theme} />
+          <ThemeSwitch />
           <Button href="/account" variant="quiet">
             Account
           </Button>

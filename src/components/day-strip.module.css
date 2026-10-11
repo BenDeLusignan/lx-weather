@@ -3,6 +3,41 @@
   position: relative;
 }
 
+/*
+ * The last day on screen has the credit below it (club-weather.tsx), and the
+ * hour card hangs out of the flow under its day, so an open card would sit on
+ * the credit. So this day keeps clear room under it while one of its hours is
+ * open, and its card is capped to that room (hour-cell.module.css reads
+ * --card-room), so the card can never be taller than the room, even with text
+ * enlarged: past the cap the card scrolls inside itself.
+ *
+ * Two sizes of room: the card on its own, and the card with its "Expand source
+ * data" table open, which adds about 21rem. The table's `open` only counts
+ * inside an open card (`details[open] details[open]`): it stays set after the
+ * card is closed. `> ol > li > details` is this day's own cells.
+ *
+ * A margin, not padding: the card is placed from the day's padding box edge, so
+ * padding would push the card down by the same amount.
+ *
+ * The numbers are the measured tallest card in rem (so they follow the text
+ * size), with a little spare. On a phone (320px is the narrowest, cells need
+ * 360px anyway): 25.0rem alone, 45.8rem with the table. From 48rem the card's
+ * figures sit side by side: 17.4rem and 38.1rem. Re-measure them if the card's
+ * content changes (11 Oct 2026: with every hour's card opened on each day, at
+ * 320, 360, 390, 767, 768, 1024 and 1440px).
+ */
+.last {
+  --card-room: 25rem;
+}
+
+.last:has(> ol > li > details[open]) {
+  margin-bottom: calc(var(--card-room) + var(--space-2));
+}
+
+.last:has(> ol > li > details[open] details[open]) {
+  --card-room: 46rem;
+}
+
 .heading {
   margin: 0 0 var(--space-2);
   font-size: var(--font-size-lg);
@@ -39,6 +74,14 @@
 }
 
 @media (min-width: 48rem) {
+  .last {
+    --card-room: 18rem;
+  }
+
+  .last:has(> ol > li > details[open] details[open]) {
+    --card-room: 39rem;
+  }
+
   .strip {
     grid-template-columns: repeat(var(--columns-wide, 12), minmax(0, 12rem));
     gap: var(--space-2);

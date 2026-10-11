@@ -3,18 +3,13 @@
   gap: var(--space-4);
 }
 
-.intro {
-  display: grid;
-  gap: var(--space-2);
-}
-
-.hint {
-  margin: 0;
-  color: var(--color-text-muted);
-  font-size: var(--font-size-sm);
-}
-
+/*
+ * The space between one day's strip and the next day's heading: 3rem, double
+ * the 1.5rem it was (Ben, 11 Oct 2026: "increase the space between the days by
+ * 100%"). loading.module.css's .week has the same value, so the page doesn't
+ * jump when the forecast arrives.
+ */
 .days {
   display: grid;
-  gap: var(--space-6);
+  gap: var(--space-12);
 }

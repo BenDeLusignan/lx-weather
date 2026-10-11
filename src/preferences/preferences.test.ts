@@ -14,7 +14,6 @@ import {
   parseDays,
   parseHours,
   preferencesFromRow,
-  showsEverything,
   weekdayIndex,
 } from "./preferences";
 
@@ -22,7 +21,6 @@ test("the defaults are the site as it was: follow the device, all seven days, al
   assert.equal(DEFAULT_PREFERENCES.theme, "system");
   assert.deepEqual(DEFAULT_PREFERENCES.days, [0, 1, 2, 3, 4, 5, 6]);
   assert.deepEqual(DEFAULT_PREFERENCES.hours, [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]);
-  assert.ok(showsEverything(DEFAULT_PREFERENCES));
 });
 
 test("the masks the schema writes in plain numbers match the constants (src/db/schema.ts, drizzle/0001)", () => {
@@ -38,7 +36,6 @@ test("a row reads back what was stored: Saturday and Sunday, 18:00 to 21:00", ()
   const row = { theme: "dark", days: daysToMask([5, 6]), hours: hoursToMask([18, 19, 20, 21]) };
   assert.deepEqual(row, { theme: "dark", days: 0b1100000, hours: 0b111100000000 });
   assert.deepEqual(preferencesFromRow(row), { theme: "dark", days: [5, 6], hours: [18, 19, 20, 21] });
-  assert.ok(!showsEverything(preferencesFromRow(row)));
 });
 
 test("a stored value that can't be right reads as the default for that setting, never as an empty week", () => {

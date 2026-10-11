@@ -10,8 +10,12 @@
 
 /*
  * wrap is only the safety net for enlarged text: at 360px and normal text size
- * the wordmark, the switch and Account fit on one row (the name stacks to two
- * short lines on a phone to make that room; see .name).
+ * the wordmark, the switch and Account fit on one row (the wordmark is two
+ * lines on a phone to make that room; see .wordmark).
+ *
+ * The column gap (8px) is what keeps the wordmark link's hover fill off the
+ * switch; .actions has the same gap for Account. A hover fill is the link's
+ * whole box, so the clear space between the boxes is what stops them touching.
  */
 .nav {
   /* The tile is only 2.2:1 on the light blue header, so the mark gets a navy hairline here (none in the dark theme, where it is 4.5:1); see globals.css. */
@@ -20,16 +24,17 @@
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-1);
+  gap: var(--space-1) var(--space-2);
   max-width: var(--content-width);
   margin-inline: auto;
   padding: var(--space-1) var(--space-3);
 }
 
-/* The switch and Account, kept together at the right. */
+/* The switch and Account, kept together at the right, with clear space between them so Account's hover fill never touches the switch. */
 .actions {
   display: flex;
   align-items: center;
+  gap: var(--space-2);
 }
 
 /*
@@ -37,7 +42,7 @@
  * page, so in the header's band they are re-coloured here, only for the
  * header's links, rather than changing the shared Button. `.nav a` is more
  * specific than the button's own classes, so these win without !important.
- * nowrap: "Account" and the wordmark must each stay on one line.
+ * nowrap: "Account" must stay on one line.
  * The side padding is halved on a phone (the button's own is 1rem) to give the
  * wordmark and the switch room at 360px.
  */
@@ -49,6 +54,7 @@
 
 /* The wordmark link also gives up most of its side padding on a phone, which lines the mark up with the page's 12px gutter, nearly. */
 .nav > a {
+  padding-block: 0;
   padding-inline: var(--space-1);
 }
 
@@ -62,50 +68,40 @@
 
 /*
  * The wordmark: calm and upright, in the page's own system font (no extra font
- * to download, and it sits with the Account link beside it). "LX" is bold and
- * "Tennis Weather" is regular weight, so the eye reads the short name first
- * and the rest second, the way a company lockup does. Real text in a link, so
- * it reads as "LX Tennis Weather".
+ * to download, and it sits with the Account link beside it). All of it is one
+ * size and one weight, bold, so "LX Tennis Weather" reads as one even
+ * wordmark (Ben, 11 Oct 2026: "Make the Tennis Weather the same size and
+ * style as LX"). Real text in a link, so it reads as "LX Tennis Weather".
+ *
+ * On a phone one line at this size is far too wide to sit beside the switch
+ * and Account at 360px (a 345px wide screen once a desktop scrollbar's gutter
+ * is taken, the narrowest case: about 100px is left for the words). Shrinking
+ * the whole line to fit would be about 12px type, so it is locked up on two
+ * lines at one size instead, "LX Tennis" over "Weather" (each .line is a
+ * block). 20px bold is "LX Tennis" in about 92px, which leaves 13px to spare
+ * at 360px for a wider system font. From 48rem there is room for one line, at
+ * 22px: the lines go inline.
  *
  * It never changes on hover, focus or press (Ben, 11 Oct 2026: "do not change
  * like italicise when hovered"): the only feedback is the link's own pale
  * fill (.nav a:hover above) and the focus ring, the same as Account's. So
- * nothing here may set a :hover, :focus or :active rule on .wordmark, .lx or
- * .name, and font-style, transform, text-shadow and letter-spacing stay as
- * they are here. font-synthesis: none stops a browser from faking an italic
- * or a bolder weight from a face that lacks one, which would be a change in
- * the letters too.
+ * nothing here may set a :hover, :focus or :active rule on .wordmark or
+ * .line, and font-style, transform, text-shadow, weight and letter-spacing
+ * stay as they are here. font-synthesis: none stops a browser from faking an
+ * italic or a bolder weight from a face that lacks one, which would be a
+ * change in the letters too.
  */
 .wordmark {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
+  font-size: 1.25rem;
   font-style: normal;
   font-synthesis: none;
-  line-height: 1.2;
-}
-
-.lx {
-  font-size: 1.5rem;
   font-weight: 700;
-  line-height: 1;
   letter-spacing: 0.02em;
+  line-height: 1.05;
 }
 
-/*
- * On a phone one line ("LX Tennis Weather", about 133px) is 20px too wide to
- * sit beside the switch and Account at 360px, so the name stacks to two short
- * lines next to a larger "LX" (a lockup). `width: min-content` is as wide as
- * "Weather", so the two words fall onto two lines. From 48rem it is one line.
- */
-.wordmark .name {
+.line {
   display: block;
-  width: min-content;
-  text-align: start;
-  font-size: 0.8125rem;
-  font-weight: 500;
-  letter-spacing: 0.01em;
-  white-space: normal;
 }
 
 /* Breakpoint 48rem: see vision.md "Theme". The header lines up with the page's padding. */
@@ -122,13 +118,12 @@
     padding-inline: var(--space-3);
   }
 
-  .lx {
+  .wordmark {
     font-size: 1.375rem;
+    line-height: 1.2;
   }
 
-  .wordmark .name {
-    width: auto;
-    font-size: 1.125rem;
-    white-space: nowrap;
+  .line {
+    display: inline;
   }
 }

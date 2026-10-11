@@ -1,29 +1,86 @@
 /*
- * The header's light/dark switch. Two buttons side by side, each 44px tall (the
- * touch target, vision Team convention 7) and 40px wide, sit over a 32px pill,
- * so the pill looks like a slim slider while each half is still easy to hit on
- * a phone. Colours are the --color-switch-* tokens (globals.css has their contrast).
+ * The header's light/dark switch: one 80px by 44px control (44px is the touch
+ * target, vision Team convention 7), drawn as a slim 32px pill with a sun, a
+ * moon and a knob. Colours are the --color-switch-* tokens (globals.css has
+ * their contrast).
  *
- * Which half is "on" is never in this file's markup: the knob's position comes
- * from --theme-is-dark (globals.css), which follows the theme in effect, and
- * the two icons swap their colours with light-dark(). So the first paint is
- * right in both themes and for "match my device".
+ * It is ONE button to the user. Two transparent submit buttons are stacked over
+ * the picture, `.toDark` and `.toLight`, and only the one for the theme not in
+ * effect is displayed (rules below); the picture itself is a single track and
+ * knob, so the knob slides when the theme flips. The picture is never in the
+ * markup's idea of "on": the knob's position comes from --theme-is-dark
+ * (globals.css), and the icons swap their colours with light-dark(). So the
+ * first paint is right in both themes and for "match my device".
  */
-.form {
-  flex: none;
-}
-
-.track {
+.switch {
   --knob: 1.5rem;
-  /* One half of the switch: 40px wide, 44px tall (the touch target), so the whole thing is 80px and fits a 360px header beside the wordmark and Account. */
+  /* One half of the switch: 40px wide, so the whole thing is 80px and fits a 360px header beside the wordmark and Account. */
   --cell: 2.5rem;
   position: relative;
-  display: grid;
-  grid-template-columns: repeat(2, var(--cell));
+  flex: none;
+  width: calc(var(--cell) * 2);
   height: var(--touch-target);
 }
 
-/* The pill, behind the buttons. 0.375rem each side makes it 2rem tall in the 2.75rem track. */
+/* The button covers the whole switch, over the picture, and shows nothing of its own. */
+.button {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  cursor: pointer;
+}
+
+/*
+ * Which button is shown: the one for the OTHER theme. Light in effect (no
+ * attribute and a light device, or data-theme="light"): "Switch to dark mode".
+ * Dark in effect (data-theme="dark", or no attribute on a dark device): "Switch
+ * to light mode". These are the same two conditions as --theme-is-dark in
+ * globals.css; change them together. display: none takes the hidden button out
+ * of the tab order and the accessibility tree.
+ */
+.toLight {
+  display: none;
+}
+
+:root[data-theme="dark"] .toDark {
+  display: none;
+}
+
+:root[data-theme="dark"] .toLight {
+  display: block;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) .toDark {
+    display: none;
+  }
+
+  :root:not([data-theme]) .toLight {
+    display: block;
+  }
+}
+
+/* A ring just outside the pill, as wide as the control, in the header's ring colour. */
+.button:focus-visible {
+  outline-color: var(--color-header-focus);
+  outline-offset: 0;
+}
+
+/* The picture: two equal halves, sun left and moon right. Clicks go through it to the button above. */
+.track {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(2, var(--cell));
+  place-items: center;
+  pointer-events: none;
+}
+
+/* The pill, behind the icons. 0.375rem top and bottom makes it 2rem tall in the 2.75rem control. */
 .track::before {
   content: "";
   position: absolute;
@@ -47,29 +104,16 @@
   transition: translate var(--duration-fast) ease-out;
 }
 
-.option {
-  position: relative;
-  display: grid;
-  place-items: center;
-  padding: 0;
-  border: 0;
-  border-radius: 999px;
-  background: transparent;
-  cursor: pointer;
-}
-
-.option:focus-visible {
-  outline-color: var(--color-header-focus);
-  outline-offset: -2px;
-}
-
 .glyph {
+  position: relative;
   width: 1rem;
   height: 1rem;
   transition: scale var(--duration-fast);
 }
 
-.option:hover .glyph {
+/* Hover: the icon the press would switch to grows a little. */
+.toDark:hover ~ .track .moon,
+.toLight:hover ~ .track .sun {
   scale: 1.15;
 }
 
@@ -85,9 +129,14 @@
 /*
  * Windows high contrast drops background colours, which would make the knob
  * vanish: draw it as a ring round the chosen icon instead, and the icons in the
- * system text colour.
+ * system text colour. The covering button keeps its transparent fill (system
+ * colours would paint it over the picture).
  */
 @media (forced-colors: active) {
+  .button {
+    forced-color-adjust: none;
+  }
+
   .knob {
     background: transparent;
     border: 2px solid Highlight;

@@ -30,9 +30,10 @@
   height: 1rem;
 }
 
+/* The same gap between days as the real week (club-week.module.css .days): 3rem. */
 .week {
   display: grid;
-  gap: var(--space-6);
+  gap: var(--space-12);
   margin: 0;
   padding: 0;
   list-style: none;

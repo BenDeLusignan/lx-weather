@@ -10,8 +10,9 @@ import styles from "./club-weather.module.css";
 /**
  * The week screen for one club: the home screen (`/`) and an Away Game
  * (`/away/[clubId]`) are this same component with a different club (vision,
- * Core flow 4). Club name as the h1, the Open-Meteo and UK Met Office credit
- * (CC BY 4.0 and CC BY-SA 4.0, Team convention 2), then the week.
+ * Core flow 4). Club name as the h1, a line on what decides the colour, then
+ * the week, then, last of all, the Open-Meteo and UK Met Office credit
+ * (CC BY 4.0 and CC BY-SA 4.0, Team convention 2).
  *
  * The club and the heading render at once; the forecast streams in behind
  * <Suspense>, because it may have to be fetched.
@@ -51,9 +52,26 @@ export function ClubWeather({
       </div>
 
       {/*
-        * Above the week, not below it: an open hour card is positioned over
-        * what follows the last day, and the CC BY credit must never be
-        * coverable. It is also shown when the forecast can't be loaded.
+        * Ben (11 Oct 2026) asked for this sentence to sit beside the key
+        * ("explain alongside the key that the colour is decided by rain chance
+        * and wind speed"). The key has gone (his later words); his list did
+        * not name the sentence, so it stays, here above the week. It sits
+        * outside <Suspense> so the skeleton and the week start at the same
+        * height.
+        */}
+      <p className={styles.hint}>The colour is decided by the chance of rain and the wind speed.</p>
+
+      <Suspense fallback={<WeekLoading dayCount={preferences.days.length} hourCount={preferences.hours.length} />}>
+        <ClubWeek clubId={club.id} preferences={preferences} />
+      </Suspense>
+
+      {/*
+        * The very bottom of the page (Ben, 11 Oct 2026: "move the weather data
+        * line to the very bottom of the page"), and the CC BY credit must never
+        * be coverable. The hour card is out of the flow and hangs below its day;
+        * the last day reserves room for it while it is open (day-strip.module.css
+        * and hour-cell.module.css), so it can't reach this line. It is also
+        * shown when the forecast can't be loaded.
         */}
       <p className={styles.credit}>
         Weather data by <a href="https://open-meteo.com">Open-Meteo.com</a> (
@@ -62,10 +80,6 @@ export function ClubWeather({
         <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>
         ).
       </p>
-
-      <Suspense fallback={<WeekLoading dayCount={preferences.days.length} hourCount={preferences.hours.length} />}>
-        <ClubWeek clubId={club.id} preferences={preferences} />
-      </Suspense>
     </div>
   );
 }

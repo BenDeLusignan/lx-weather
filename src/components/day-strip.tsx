@@ -17,7 +17,18 @@ import { HourCell } from "./hour-cell";
  * them, the same on every day, and the strip has one column per chosen hour.
  * A chosen day with no chosen hour left (today) says so.
  */
-export function DayStrip({ clubId, shown, hours }: { clubId: string; shown: ShownDay; hours: readonly number[] }) {
+export function DayStrip({
+  clubId,
+  shown,
+  hours,
+  last,
+}: {
+  clubId: string;
+  shown: ShownDay;
+  hours: readonly number[];
+  /** The last day of the week on screen: it keeps room under it for an open hour card (day-strip.module.css). */
+  last: boolean;
+}) {
   const { day, index, blocks } = shown;
   const columns = stripColumns(hours.length);
   const headingId = `day-${clubId}-${day.date}`;
@@ -25,7 +36,7 @@ export function DayStrip({ clubId, shown, hours }: { clubId: string; shown: Show
   const relative = relativeDayName(index);
 
   return (
-    <section className={styles.day}>
+    <section className={last ? `${styles.day} ${styles.last}` : styles.day}>
       <h2 id={headingId} className={styles.heading}>
         {relative ? <span className={styles.relative}>{relative}, </span> : null}
         <span className={styles.date}>{date}</span>

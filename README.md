@@ -74,12 +74,12 @@ npm run forecast -- <latitude> <longitude>   # live week for any point
 
 | Route | What |
 | --- | --- |
-| `/` | Logged out: log in. Logged in: your home club's week (a strip of hour cells per day; tap an hour for its figures) |
+| `/` | Logged out: log in. Logged in: your home club's week (a strip of hour cells per day, each opening its figures), with the Open-Meteo credit last on the page |
 | `/signup` | Email, password (12+ characters with a number, a capital letter and a symbol; a live checklist ticks the rules as you type), home club |
 | `/away` | The other clubs, alphabetical |
 | `/away/[clubId]` | The same week screen for that club |
 | `/account` | Email, change home club, change password (the same rules and checklist for the new one; logs out your other devices), which days and hours you see, log out |
-| (every logged-in screen) | The header: the LX Tennis Weather link home, a light/dark slider (saves your choice and comes back to the same page), and Account |
+| (every logged-in screen) | The header: the LX Tennis Weather link home, a light/dark slider (one button: it switches to dark if the screen is light and to light if it is dark, saves your choice and comes back to the same page), and Account |
 
 ## Gotchas
 
