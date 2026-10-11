@@ -6,4 +6,13 @@ A weather app for tennis players in Northern Ireland. It combines the forecasts 
 
 ## Status
 
-Just started. The repo holds the vision doc only; there is no code or stack yet (the stack is an open question in the vision).
+Only the forecast engine is built (`src/forecast/`): it fetches the five providers for a latitude/longitude and combines them per hour. There is no web app, database, clubs or users yet. See "Current state" in the vision doc.
+
+## Commands
+
+```sh
+npm install
+npm test                                     # unit tests (fake data, no network)
+npx tsc --noEmit                             # type check
+npm run forecast -- <latitude> <longitude>   # live next 24 hours, for a quick look
+```

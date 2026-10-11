@@ -57,7 +57,7 @@ This is the list of places "where we might be playing". Names are as Ben wrote t
    - **Yellow:** 40% to 70%.
    - **Green:** under 40%.
 
-   Team's reading, not Ben's words: exactly 40% and exactly 70% are yellow. Ben gave no wind threshold (the first brief said "no rain or wind"); see Open questions.
+   Team's reading, not Ben's words: exactly 40% and exactly 70% are yellow, and the light follows the whole-number % shown on screen (70.4% shows as 70% and is yellow; 70.5% shows as 71% and is red), so the number and the colour never disagree. Ben gave no wind threshold (the first brief said "no rain or wind"); see Open questions.
 4. **Units:** temperature in **Celsius**; wind in **mph and km/h**. Team's reading, not Ben's words: both wind units are shown together wherever wind appears (the way LX Tennis shows lb and kg), so nobody has to pick.
 5. **The five providers are the five whose data is most publicly accessible** (Ben: "I'm not sure who they are, but I'm thinking this app will replace a player having to open the 5 most popular weather apps and making an average decision themselves, so whoever has the 5 most publicly accessible data"). Which five is the team's call, below.
 6. **Combining the forecasts:** whichever method gives the most reliable end point (Ben: "Whichever would work best"). The team's pick is below.
@@ -85,7 +85,13 @@ This is the list of places "where we might be playing". Names are as Ben wrote t
 
 ## Current state
 
-Nothing is built yet. This repo holds the vision, a README and a `.gitignore`. There is no code and no data yet.
+Only the forecast engine exists: TypeScript in `src/forecast/`, no Next.js, database, UI, clubs or users yet.
+
+- It takes a latitude and longitude and makes one Open-Meteo call for the five providers (14 days of hourly temperature, chance of rain and wind). `aggregate.ts` gives each hour its aggregate (Team convention 3) with how many providers contributed and each provider's own value; `rain-light.ts` gives the green/yellow/red light for a chance of rain.
+- A provider with no value for an hour is a gap (`null`) and is never filled. A provider with nothing at all is reported as unavailable. If the fetch fails it throws `ForecastFetchError`.
+- It does not turn hours into a day or a day icon (open question below), and has no wind or temperature light.
+- Run `npm run forecast -- <latitude> <longitude>` to see the next 24 hours live, and `npm test` for the tests.
+- **For whoever builds the UI on it:** hours are UTC instants, so group them into days in Europe/London, not UTC. A provider that doesn't reach that far ahead is a `null` in an hour's per-provider values, which looks the same as an outage (only a provider with nothing at all is in `unavailable`). If all five are unavailable the fetch still returns normally, so the empty state must check for that as well as catching `ForecastFetchError`.
 
 ## Open questions (Ben hasn't answered; don't decide these)
 
