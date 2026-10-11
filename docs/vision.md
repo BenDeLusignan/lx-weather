@@ -30,12 +30,14 @@ A website / web app that works on **both the computer and the phone**.
 
 ## Core flow (Ben's decisions)
 
-1. **Open the app, log in.** It shows **the logged-in user's home club**, with **the current week and next week**.
-2. **Each day gets a traffic-light icon** for playing conditions:
+1. **Open the app, log in.** It shows **the logged-in user's home club** for **one week** (Ben: "Let's just do one week then"; this replaces the first brief's current week and next week).
+2. **Every day shows its times from 08:00 to 20:00, and each block gets a traffic-light score** (Ben: "show the times for each day from 08:00 to 20:00 and have a score for each block"):
    - **Green:** a good chance of no rain or wind.
    - **Yellow:** passable level of play.
    - **Red:** very unlikely you will get to play.
-3. **An Away Game button.** The user picks any of the other clubs from the list and sees that club's two-week weather (the same current week and next week view).
+
+   Team's readings, not Ben's words, so say if any is wrong: **one week is today and the next six days** (not Monday to Sunday); **a block is one hour** (08:00 to 09:00, then on to 19:00 to 20:00: twelve a day); **the score is the green/yellow/red light**; the blocks of today that are already over are not shown; all times are UK time (Europe/London).
+3. **An Away Game button.** The user picks any of the other clubs from the list and sees that club's one-week weather (the same view).
 4. **Aggregated figures, with the sources one tap away.** Temperature, wind, rain and the rest are shown as an **aggregate** of the five providers. An **expand source data** control shows what each of the five providers says specifically.
 
 ## The clubs (Ben's decision)
@@ -44,7 +46,14 @@ Eighteen clubs, in the order Ben listed them:
 
 Enniskillen, Irvinestown, Omagh, Limavady, Coleraine, Dungannon, Ballymena, Portadown, Banbridge, Downshire (Hillsborough), Hilden (Lisburn), Larne, Whitehead, Belfast, Newcastle, Bangor, Donaghadee, Cloughey.
 
-This is the list of places "where we might be playing". Names are as Ben wrote them. **"Belfast" stands for about five clubs**, so the final list has one entry per club. Ben will provide each club's address; the forecast location is worked out from it.
+This is the list of places "where we might be playing". Names are as Ben wrote them. **"Belfast" stands for about five clubs**, so the final list has one entry per club (Ben still has to say which; see Open questions).
+
+**Addresses and locations** (Ben: "Use google maps and search for the names I gave you but add tennis club after each name") are in `src/clubs/clubs.ts`, found by searching Google Maps for each name plus "tennis club". Where the search didn't land on an obvious club, the team checked the club's own site or page:
+
+- **Banbridge:** Google Maps has no Banbridge tennis club listing. Banbridge Tennis Club's own website says it plays at Banbridge Leisure Centre, so that is the location.
+- **Hilden:** Google Maps lists the site as "Hilden Tennis Academy"; Hilden Tennis Club's Facebook page gives the same address (36 Belfast Road, Lisburn, also Lisburn Racquets Club).
+- **Limavady:** the tennis club is the Limavady Recreation Club's tennis section.
+- **Bangor:** Google Maps' first result for "Bangor tennis club" was Bangor in Wales; the club used is Bangor Lawn Tennis Club, Farnham Park, Co Down.
 
 ## Product rules
 
@@ -52,12 +61,15 @@ This is the list of places "where we might be playing". Names are as Ben wrote t
 
 1. **The headline is the aggregate; the providers are the detail.** The default view never makes the user read five forecasts. The five are available under "expand source data" (Core flow, 4).
 2. **Never invent weather.** If a provider has no data or can't be reached, say so and show what the others say. No placeholder or sample numbers dressed up as a forecast. If nothing can be shown, show an honest empty state.
-3. **The traffic light follows the chance of rain** (Ben: "Rain is what people are most worried about"):
-   - **Red:** over 70% chance of rain.
-   - **Yellow:** 40% to 70%.
-   - **Green:** under 40%.
+3. **The traffic light follows the chance of rain and the wind.**
+   - **Rain** (Ben: "Rain is what people are most worried about"):
+     - **Red:** over 70% chance of rain.
+     - **Yellow:** 40% to 70%.
+     - **Green:** under 40%.
+   - **Wind:** Ben: "strong wind definitely makes the game unplayable, but I can't remember what speed feels too much". So a strong enough wind is red; the speeds are the team's pick (Team convention 4), for Ben to confirm.
+   - **A block's light is the worse of its rain light and its wind light.**
 
-   Team's reading, not Ben's words: exactly 40% and exactly 70% are yellow, and the light follows the whole-number % shown on screen (70.4% shows as 70% and is yellow; 70.5% shows as 71% and is red), so the number and the colour never disagree. Ben gave no wind threshold (the first brief said "no rain or wind"); see Open questions.
+   Team's reading, not Ben's words: exactly 40% and exactly 70% are yellow, and the light follows the whole-number % shown on screen (70.4% shows as 70% and is yellow; 70.5% shows as 71% and is red), so the number and the colour never disagree.
 4. **Units:** temperature in **Celsius**; wind in **mph and km/h**. Team's reading, not Ben's words: both wind units are shown together wherever wind appears (the way LX Tennis shows lb and kg), so nobody has to pick.
 5. **The five providers are the five whose data is most publicly accessible** (Ben: "I'm not sure who they are, but I'm thinking this app will replace a player having to open the 5 most popular weather apps and making an average decision themselves, so whoever has the 5 most publicly accessible data"). Which five is the team's call, below.
 6. **Combining the forecasts:** whichever method gives the most reliable end point (Ben: "Whichever would work best"). The team's pick is below.
@@ -68,7 +80,7 @@ This is the list of places "where we might be playing". Names are as Ben wrote t
 1. **Every figure shows how many providers it's built from** (e.g. "4 of 5 providers") when fewer than five contributed, so an aggregate from two sources is never mistaken for one from five.
 2. **The five providers are Met Office (UKMO), ECMWF, DWD ICON, NOAA GFS and Environment Canada GEM, all fetched through [Open-Meteo](https://open-meteo.com)** (the team's pick, measured on 11 Oct 2026 for a Belfast location). *Why:* Open-Meteo is free for non-commercial use, needs no key, and serves all five from one call per location. A portfolio project is non-commercial; **a commercial plan is needed if the site ever earns money**. The free limits are 10,000 calls a day and 300,000 a month. The data is CC BY 4.0, so **Open-Meteo is credited on the site**.
    - **These are forecast models, not the consumer apps.** The apps (Apple Weather, BBC Weather and the rest) post-process models like these, and none has a free public data feed. So the app replaces opening the apps by combining the models underneath them.
-   - **Why not the apps Ben named.** BBC Weather has no public API (its only developer feed is a 3-day, non-commercial RSS feed documented in 2011). Apple Weather's data comes through WeatherKit, which needs an Apple Developer Program membership (500,000 calls a month included).
+   - **Why not the apps Ben named.** BBC Weather has no public API (its only developer feed is a 3-day, non-commercial RSS feed documented in 2011). Ben has dropped Apple Weather ("ignore apple weather then"; it needs a paid Apple Developer membership) and the Met Office's own feed ("just pull the data from API": the Met Office model through Open-Meteo is the Met Office source).
    - **Why not MET Norway or Météo-France.** Both are free, but neither gives a chance of rain, only an amount, and the traffic light needs the chance (Ben's decision 3).
    - **How far ahead each one reaches** (when the chance of rain is last given, and when everything else is, for 11 Oct 2026):
 
@@ -80,8 +92,9 @@ This is the list of places "where we might be playing". Names are as Ben wrote t
      | NOAA GFS | 26 Oct | 26 Oct |
      | Environment Canada GEM | 26 Oct | 21 Oct |
 
-   - **Consequence:** the first days have all five providers; the second week has two or three. Convention 1 shows that on every day, so it is never hidden. GEM's chance of rain runs 5 days past its other figures; the team hasn't checked whether that stretch is trustworthy.
+   - **Consequence:** for a week starting 11 Oct every figure has four or five providers (16 Oct: DWD ICON's chance of rain has ended; 17 Oct: the Met Office model's other figures end at 13:00). Convention 1 shows the count on every figure, so it is never hidden. Outside the first week there are fewer, which is a reason to keep it to one week.
 3. **Rain chance is the mean of the providers that give one; temperature and wind are the median.** *Why:* each provider's chance is already a probability, so their mean is a probability too and every provider counts; the median keeps one model with a wild temperature or wind from dragging the figure. This is the team's reading of "most reliable", **not yet tested**: it should be checked against what actually happened (Open-Meteo's free Historical Forecast API holds past forecasts) before it is treated as settled.
+4. **Wind lights, by sustained wind speed** (Ben didn't give speeds; these are the team's pick, to be confirmed): **green under 10 mph, yellow 10 to 15 mph, red over 15 mph**, on the whole-number mph shown, like the rain light. *Why:* one tennis-conditions guide (Playable) says wind noticeably affects play from about 7 mph and is "genuinely unplayable for most recreational players above 15 mph sustained". Northern Ireland is windy, so the team put yellow at 10 rather than 7, so a normal breeze isn't a red day. The speed is the forecast's wind at 10 m up in the open, and courts are often sheltered; gusts, which the same guide says matter as much, are not used yet (see Open questions).
 
 ## Current state
 
@@ -95,17 +108,15 @@ Only the forecast engine exists: TypeScript in `src/forecast/`, no Next.js, data
 
 ## Open questions (Ben hasn't answered; don't decide these)
 
-- **Wind in the traffic light.** Ben gave rain thresholds only. Whether wind can make a day yellow or red (and at what mph), and whether temperature counts, is not set.
-- **How the hours of a day become one icon.** A day has 24 hourly forecasts and a player plays in some of them. Which hours count (and whether the day's chance is the average, or the worst hour, over them) is not decided. Using the whole day would count rain at 3am; using the worst hour would make one passing shower turn the day yellow.
+- **Confirm the wind speeds.** Ben can't remember what speed feels too much. The team's pick is yellow from 10 mph and red over 15 mph (Team convention 4); Ben says if that doesn't match how it feels on court.
+- **One icon for a day?** Ben's first brief gave each day an icon; the week view now shows a score per hour block. Whether each day also gets one icon, and how it is worked out from its blocks, is not decided.
 - **Sign-up details.** How a user signs up (email and password, as on LX Tennis, is the obvious choice but not decided), and whether they can change their home club afterwards.
-- **The clubs.** Ben will provide the addresses, and the names of the five or so Belfast clubs.
-- **What "the rest" means.** Ben listed temperature, wind and rain "etc". Other figures (humidity, gusts, sunrise and sunset, court-drying time) are not decided.
+- **Which Belfast clubs.** About five. Google Maps' search for "Belfast tennis club" gave these seven, for Ben to pick from (address, then latitude and longitude): Windsor Tennis Club (37 Windsor Ave, BT9 6EJ; 54.5789615, -5.9428311), Belfast Boat Club (12 Lockview Rd, Stranmillis, BT9 5FJ; 54.5693257, -5.9272395), Cavehill Tennis Club (20 N Circular Rd, BT15 5HB; 54.6334037, -5.9423441), Ballynafeigh Tennis Club (35A Wynchurch Park, BT6 0JL; 54.5695406, -5.9018683), Indoor Tennis Arena and Ozone Complex (Ormeau Embankment, BT6 8LT; 54.5896789, -5.9151837), Hawarden Lawn Tennis Club (3 Clonlee Dr, BT4 3DA; 54.5967078, -5.876607), Forth River Bowling & Tennis Club (104a Woodvale Rd, BT13 3BU; 54.6101643, -5.9638982). The models are coarse (the ECMWF grid in this feed is 0.25 degrees, so a Belfast point was snapped to 54.5, -6.0), so the Belfast clubs will mostly show the same or a near-identical forecast.
+- **What "the rest" means.** Ben listed temperature, wind and rain "etc". Other figures (humidity, gusts, sunrise and sunset, court-drying time) are not decided. Gusts matter for tennis, so they are the likeliest addition.
 - **The look.** LX Tennis's synthwave theme is Ben's decision for that site only; this site's look hasn't been chosen.
 
 ## Proposals awaiting Ben (not decided)
 
-- **Add Apple Weather through WeatherKit, in place of the weakest of the five.** It needs an Apple Developer Program membership (the team doesn't know whether Ben has one). It would give the app one of the consumer apps Ben named, not just its underlying models.
-- **Add the Met Office's own feed (Weather DataHub) alongside its model in Open-Meteo.** It is free up to 360 calls a day with a registered key. It would put the Met Office's official, post-processed forecast in by name, for the first week only.
 - **Forecasts fetched on the server and cached**, so the five providers aren't called on every page view and stay well under Open-Meteo's free limits.
 
 ## Priority and roadmap order (Ben's decision)
