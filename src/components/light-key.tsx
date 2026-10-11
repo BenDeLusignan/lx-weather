@@ -3,8 +3,9 @@ import styles from "./light-key.module.css";
 
 /**
  * The four lights with their shapes and words, once above the week, so the
- * shapes in the cells can be learned at a glance. The word is in every cell
- * as well: the key helps, but nobody has to find it.
+ * shapes in the cells can be learned at a glance, and a plain sentence on what
+ * decides the colour (Core flow 3). The word is in every cell as well: the key
+ * helps, but nobody has to find it.
  */
 export function LightKey() {
   return (
@@ -24,6 +25,7 @@ export function LightKey() {
           <LightBadge light={null} />
         </li>
       </ul>
+      <p className={styles.note}>The colour is decided by the chance of rain and the wind speed.</p>
     </div>
   );
 }

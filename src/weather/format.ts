@@ -136,7 +136,7 @@ export const HOURS_PER_PHONE_ROW = 6;
 
 /**
  * The grid column (1-based) of a block in its day's strip, on a phone (two
- * rows of six: 08:00 to 13:00, then 14:00 to 19:00) and on a wide screen (one
+ * rows of six: 10:00 to 15:00, then 16:00 to 21:00) and on a wide screen (one
  * row of twelve). Setting it per block keeps every hour in the same column on
  * every day, even for today, whose finished hours are simply not there.
  */

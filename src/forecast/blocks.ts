@@ -2,24 +2,25 @@
 // lights and source data (vision, Core flow 1 and 2, and Product rule 3).
 //
 // The team's readings of Ben's words, all in the vision: the week is today plus
-// the next six days; a block is one hour, 08:00-09:00 to 19:00-20:00 (twelve a
+// the next six days; a block is one hour, 10:00-11:00 to 21:00-22:00 (twelve a
 // day); blocks of today that are already over are omitted; every date and hour
 // is UK time (Europe/London).
 //
 // WHICH HOURLY STAMPS FEED A BLOCK. Open-Meteo stamps hourly values with the
 // END of what they describe for rain and the INSTANT for the rest (its docs:
 // `precipitation_probability` is the "preceding hour probability", so the
-// 09:00 value covers 08:00-09:00; `temperature_2m` and `wind_speed_10m` are
-// "instant" at the stamp). So for the block 08:00-09:00, per provider:
-//   - rain chance: the 09:00 stamp (the one that describes exactly that hour);
-//   - temperature and wind: the mean of the 08:00 and 09:00 stamps (the
+// 11:00 value covers 10:00-11:00; `temperature_2m` and `wind_speed_10m` are
+// "instant" at the stamp). So for the block 10:00-11:00, per provider:
+//   - rain chance: the 11:00 stamp (the one that describes exactly that hour);
+//   - temperature and wind: the mean of the 10:00 and 11:00 stamps (the
 //     instants at the block's start and end), computed per provider BEFORE the
 //     providers are combined, and only when both stamps have a value. A
 //     provider with one of the two missing gives nothing for that figure; the
 //     other stamp is not used on its own (that would be filling a gap).
-// Every figure therefore needs the 09:00 stamp, so a provider that runs out
-// at 09:00 still covers the 08:00-09:00 block and no block is lost by taking
-// the mean.
+// Every figure therefore needs the 11:00 stamp, so a provider that runs out
+// at 11:00 still covers the 10:00-11:00 block and no block is lost by taking
+// the mean. The last block, 21:00-22:00, needs the 22:00 stamp, which the
+// forecast always holds: it is fetched as whole UK days (see open-meteo.ts).
 //
 // Time zone: the stamps are UTC instants; a block's local date and hour come
 // from Intl with Europe/London, never a fixed offset, so a clock change inside
@@ -39,9 +40,9 @@ import { rainLight, type RainLight } from "./rain-light";
 import { windLight, type WindLight } from "./wind-light";
 
 export const TIME_ZONE = "Europe/London";
-export const FIRST_BLOCK_HOUR = 8;
-/** The last block starts at 19:00 and ends at 20:00. */
-export const LAST_BLOCK_HOUR = 19;
+export const FIRST_BLOCK_HOUR = 10;
+/** The last block starts at 21:00 and ends at 22:00. */
+export const LAST_BLOCK_HOUR = 21;
 export const WEEK_DAYS = 7;
 
 const HOUR_MS = 3_600_000;
@@ -53,7 +54,7 @@ export interface Block {
   start: string;
   /** UK local date of the block, `YYYY-MM-DD`. */
   date: string;
-  /** UK local start hour, 8 to 19 (the block is `startHour`:00 to `startHour + 1`:00). */
+  /** UK local start hour, 10 to 21 (the block is `startHour`:00 to `startHour + 1`:00). */
   startHour: number;
   temperatureC: FigureAggregate;
   rainChancePercent: FigureAggregate;
@@ -67,7 +68,7 @@ export interface Block {
 export interface Day {
   /** UK local date, `YYYY-MM-DD`. */
   date: string;
-  /** Twelve blocks, fewer for today once some are over (none after 20:00). */
+  /** Twelve blocks, fewer for today once some are over (none after 22:00). */
   blocks: Block[];
 }
 
@@ -181,7 +182,7 @@ function londonParts(ms: number): { date: string; hour: number } {
   return { date: `${p.year}-${p.month}-${p.day}`, hour: Number(p.hour) };
 }
 
-/** The UTC instant of `hour`:00 UK time on `date`. Only for hours that exist once (08-19 always do). */
+/** The UTC instant of `hour`:00 UK time on `date`. Only for hours that exist once (10-21 always do). */
 function londonToUtcMs(date: string, hour: number): number {
   const [y, m, d] = date.split("-").map(Number) as [number, number, number];
   const asIfUtc = Date.UTC(y, m - 1, d, hour);

@@ -20,3 +20,9 @@
   padding: 0;
   list-style: none;
 }
+
+/* On its own line below the badges, so it wraps as text rather than squeezing the row. */
+.note {
+  flex-basis: 100%;
+  margin: 0;
+}

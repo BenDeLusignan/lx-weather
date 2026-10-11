@@ -17,7 +17,7 @@
 }
 
 /*
- * Two rows of six on a phone (08:00 to 13:00, 14:00 to 19:00), one row of
+ * Two rows of six on a phone (10:00 to 15:00, 16:00 to 21:00), one row of
  * twelve from 48rem (vision.md "Theme"; HOURS_PER_PHONE_ROW in
  * format.ts must match the 6; change them together). Every cell has the same
  * fixed height (hour-cell.module.css) and the rows are equal too, so nothing

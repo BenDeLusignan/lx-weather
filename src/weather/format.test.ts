@@ -70,15 +70,15 @@ test("an unknown light says which figure couldn't be judged", () => {
 });
 
 test("a block's time range is its hour, to the next", () => {
-  assert.equal(timeRange(8), "08:00–09:00");
-  assert.equal(timeRange(19), "19:00–20:00");
+  assert.equal(timeRange(10), "10:00–11:00");
+  assert.equal(timeRange(21), "21:00–22:00");
 });
 
 test("an hour sits in the same column on every day: two rows of six on a phone, one row of twelve on a wide screen", () => {
-  assert.deepEqual(gridColumns(8), { phone: 1, wide: 1 });
-  assert.deepEqual(gridColumns(13), { phone: 6, wide: 6 });
-  assert.deepEqual(gridColumns(14), { phone: 1, wide: 7 }, "14:00 starts the phone's second row");
-  assert.deepEqual(gridColumns(19), { phone: 6, wide: 12 });
+  assert.deepEqual(gridColumns(10), { phone: 1, wide: 1 });
+  assert.deepEqual(gridColumns(15), { phone: 6, wide: 6 });
+  assert.deepEqual(gridColumns(16), { phone: 1, wide: 7 }, "16:00 starts the phone's second row");
+  assert.deepEqual(gridColumns(21), { phone: 6, wide: 12 });
 });
 
 test("wind comes as two parts so a narrow table can stack mph over km/h, and as one string everywhere else", () => {
