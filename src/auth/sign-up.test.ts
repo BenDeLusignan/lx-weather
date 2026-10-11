@@ -5,13 +5,13 @@ import { test } from "node:test";
 import { sql } from "drizzle-orm";
 import { verifyPassword } from "@/auth/password";
 import { submitSignUp } from "@/auth/submit";
-import { LOGIN_FAILURE_LIMIT, PASSWORD_MIN_LENGTH } from "@/data/limits";
+import { LOGIN_FAILURE_LIMIT, PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH } from "@/data/limits";
 import { getDb } from "@/db/client";
-import { user } from "@/db/schema";
+import { loginAttempt, user } from "@/db/schema";
 
 const NOW = 1_700_000_000;
 const IP = "198.51.100.4";
-const PASSWORD = "correct-horse-battery";
+const PASSWORD = "Correct-horse-battery-7";
 
 function form(overrides: Record<string, string> = {}): FormData {
   const formData = new FormData();
@@ -36,7 +36,7 @@ test("sign-up creates the user with a hashed password and a normalised email, an
   assert.ok(!row.passwordHash.includes(PASSWORD));
   assert.ok(row.passwordHash.startsWith("scrypt$"));
   assert.ok(await verifyPassword(PASSWORD, row.passwordHash));
-  assert.ok(!(await verifyPassword("not-the-password-0", row.passwordHash)));
+  assert.ok(!(await verifyPassword("Not-the-password-0!", row.passwordHash)));
 
   // The session to start is for this user, under this hash.
   assert.deepEqual(result.session, { id: row.id, passwordHash: row.passwordHash, theme: "system" });
@@ -46,7 +46,7 @@ test("a duplicate email is refused, whatever its case or spacing, with the same 
   await signUp({ email: "dup@example.com" }, "198.51.100.10");
 
   for (const email of ["dup@example.com", "DUP@Example.com", " dup@example.com "]) {
-    const again = await signUp({ email, homeClub: "omagh", password: "another-long-password" }, "198.51.100.10");
+    const again = await signUp({ email, homeClub: "omagh", password: "Another-long-password-1" }, "198.51.100.10");
     assert.deepEqual(again, { redirect: "/signup?error=failed" }, "no session, and nothing about the email");
   }
   const rows = await usersWithEmail("dup@example.com");
@@ -54,11 +54,11 @@ test("a duplicate email is refused, whatever its case or spacing, with the same 
   assert.equal(rows[0]?.homeClubId, "enniskillen", "the first account is untouched");
 });
 
-test("a bad email, a short password or a club not in the list creates nothing", async () => {
+test("a bad email, a weak password or a club not in the list creates nothing", async () => {
   const cases: [Record<string, string>, string][] = [
     [{ email: "not-an-email" }, "/signup?error=email"],
     [{ email: "a@b" }, "/signup?error=email"],
-    [{ password: "x".repeat(PASSWORD_MIN_LENGTH - 1) }, "/signup?error=password"],
+    [{ password: "Ab1!".padEnd(PASSWORD_MIN_LENGTH - 1, "x") }, "/signup?error=password"],
     [{ homeClub: "atlantis" }, "/signup?error=club"],
     [{ homeClub: "" }, "/signup?error=club"],
     [{ homeClub: "ENNISKILLEN" }, "/signup?error=club"],
@@ -69,6 +69,37 @@ test("a bad email, a short password or a club not in the list creates nothing", 
   }
   assert.equal((await usersWithEmail("invalid@example.com")).length, 0);
   assert.equal((await usersWithEmail("not-an-email")).length, 0);
+});
+
+test("a password missing any one rule is refused, writes nothing and costs no attempt", async () => {
+  const ip = "198.51.100.88";
+  const weak = [
+    "Short-1!aB", // too short
+    "No-number-here-Abc!", // no number
+    "no-capital-here-123!", // no capital
+    "NoSymbolHere1234", // no symbol
+    "No symbol here 1234", // spaces are not symbols
+    "Ab1!".padEnd(PASSWORD_MAX_LENGTH + 1, "x"), // over the cap
+  ];
+  const attemptsBefore = (await getDb().select().from(loginAttempt)).length;
+  // More refusals than the limit allows attempts: none of them may count.
+  for (let i = 0; i < LOGIN_FAILURE_LIMIT * 2; i++) {
+    for (const password of weak) {
+      assert.deepEqual(await signUp({ email: "weak@example.com", password }, ip), { redirect: "/signup?error=password" });
+    }
+  }
+  assert.equal((await usersWithEmail("weak@example.com")).length, 0);
+  assert.equal((await getDb().select().from(loginAttempt)).length, attemptsBefore, "the limiter wasn't touched");
+
+  // And a password meeting every rule still gets in from the same address.
+  assert.equal((await signUp({ email: "weak@example.com" }, ip)).redirect, "/");
+});
+
+test("a password at exactly the floor and exactly the cap is accepted", async () => {
+  const floor = "Ab1!".padEnd(PASSWORD_MIN_LENGTH, "x");
+  const cap = "Ab1!".padEnd(PASSWORD_MAX_LENGTH, "x");
+  assert.equal((await signUp({ email: "floor@example.com", password: floor })).redirect, "/");
+  assert.equal((await signUp({ email: "cap@example.com", password: cap })).redirect, "/");
 });
 
 test("a hand-made request with missing or odd fields is refused, not crashed", async () => {

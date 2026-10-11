@@ -13,8 +13,10 @@ import { Form } from "@/components/form";
 import { FormMessage } from "@/components/form-message";
 import { PageLoading } from "@/components/loading";
 import { Narrow } from "@/components/narrow";
+import { NewPasswordInput } from "@/components/new-password-input";
 import { PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH } from "@/data/limits";
 import { lockoutMessage } from "@/forms/lockout-message";
+import { PASSWORD_REQUIREMENT } from "@/forms/password-rules";
 import { BLOCK_HOURS, WEEKDAYS } from "@/preferences/preferences";
 import { saveDays, saveHours } from "@/preferences/actions";
 import { hourLabel } from "@/weather/format";
@@ -29,7 +31,7 @@ export const metadata: Metadata = {
 // A wrong current password only says it is wrong: nothing beyond what was typed.
 const PASSWORD_ERRORS: Record<PasswordChangeError, string> = {
   "password-invalid": "Enter your current password. Nothing was changed.",
-  "password-short": `Use a new password of at least ${PASSWORD_MIN_LENGTH} characters. Nothing was changed.`,
+  "password-weak": `Use a new password of ${PASSWORD_REQUIREMENT}. Nothing was changed.`,
   "password-mismatch": "The new password and its confirmation don’t match. Nothing was changed.",
   "password-same": "Choose a new password that is different from your current one. Nothing was changed.",
   "password-wrong": "Your current password is wrong. Nothing was changed.",
@@ -58,7 +60,7 @@ async function Account({ searchParams }: Pick<PageProps<"/account">, "searchPara
   // `error` is only believed when it is one of our codes.
   const passwordError = typeof error === "string" && Object.hasOwn(PASSWORD_ERRORS, error) ? (error as PasswordChangeError) : null;
   const currentInvalid = passwordError === "password-wrong" || passwordError === "password-invalid";
-  const newInvalid = passwordError === "password-short" || passwordError === "password-same";
+  const newInvalid = passwordError === "password-weak" || passwordError === "password-same";
   const confirmInvalid = passwordError === "password-mismatch";
 
   return (
@@ -135,19 +137,13 @@ async function Account({ searchParams }: Pick<PageProps<"/account">, "searchPara
           <Field
             id="password-new"
             label="New password"
-            hint={`At least ${PASSWORD_MIN_LENGTH} characters. Changing it logs you out of your other devices.`}
+            hint="Changing it logs you out of your other devices."
           >
-            <input
+            <NewPasswordInput
               id="password-new"
               name="new"
-              type="password"
-              required
-              minLength={PASSWORD_MIN_LENGTH}
-              maxLength={PASSWORD_MAX_LENGTH}
-              autoComplete="new-password"
-              aria-invalid={newInvalid || undefined}
-              aria-describedby={describedBy(hintId("password-new"), newInvalid && PASSWORD_MESSAGE_ID)}
-              className={controlClassName}
+              invalid={newInvalid}
+              describedBy={describedBy(hintId("password-new"), newInvalid && PASSWORD_MESSAGE_ID)}
             />
           </Field>
           <Field id="password-confirm" label="Confirm new password">

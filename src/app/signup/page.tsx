@@ -8,12 +8,14 @@ import type { SignUpError } from "@/auth/submit";
 import { AuthCard } from "@/components/auth-card";
 import { SubmitButton } from "@/components/button";
 import { ClubSelect } from "@/components/club-select";
-import { Field, controlClassName, describedBy, hintId } from "@/components/field";
+import { Field, controlClassName, describedBy } from "@/components/field";
 import { Form } from "@/components/form";
 import { FormMessage } from "@/components/form-message";
 import { PageLoading } from "@/components/loading";
-import { EMAIL_MAX_LENGTH, PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH } from "@/data/limits";
+import { NewPasswordInput } from "@/components/new-password-input";
+import { EMAIL_MAX_LENGTH } from "@/data/limits";
 import { lockoutMessage } from "@/forms/lockout-message";
+import { PASSWORD_REQUIREMENT } from "@/forms/password-rules";
 
 export const metadata: Metadata = {
   title: "Sign up",
@@ -26,7 +28,7 @@ export const metadata: Metadata = {
 // on the database.
 const ERRORS: Record<SignUpError, string> = {
   email: "That doesn’t look like an email address. Nothing was saved.",
-  password: `Use a password of at least ${PASSWORD_MIN_LENGTH} characters. Nothing was saved.`,
+  password: `Use a password of ${PASSWORD_REQUIREMENT}. Nothing was saved.`,
   club: "Choose your home club from the list. Nothing was saved.",
   failed:
     "We couldn’t create an account with those details. If you already have one, log in instead.",
@@ -76,22 +78,12 @@ async function SignUp({ searchParams }: Pick<PageProps<"/signup">, "searchParams
             className={controlClassName}
           />
         </Field>
-        <Field
-          id="signup-password"
-          label="Password"
-          hint={`At least ${PASSWORD_MIN_LENGTH} characters.`}
-        >
-          <input
+        <Field id="signup-password" label="Password">
+          <NewPasswordInput
             id="signup-password"
             name="password"
-            type="password"
-            required
-            minLength={PASSWORD_MIN_LENGTH}
-            maxLength={PASSWORD_MAX_LENGTH}
-            autoComplete="new-password"
-            aria-invalid={code === "password" || undefined}
-            aria-describedby={describedBy(hintId("signup-password"), code === "password" && ERROR_ID)}
-            className={controlClassName}
+            invalid={code === "password"}
+            describedBy={describedBy(code === "password" && ERROR_ID)}
           />
         </Field>
         <Field id="signup-club" label="Home club">

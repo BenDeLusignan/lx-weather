@@ -15,14 +15,15 @@ import {
 import { changePasswordHash, createUser, getUserCredentialsById, type User } from "@/data/users";
 import { getDb } from "@/db/client";
 import { loginAttempt, user as userTable } from "@/db/schema";
+import { passwordMeetsRules } from "@/forms/password-rules";
 
 // A fixed clock and two addresses: time is moved by arithmetic, never slept through.
 const NOW = 1_700_000_000;
 const IP_A = "198.51.100.4";
 const IP_B = "198.51.100.99";
 
-const OLD = "correct-horse-battery";
-const NEW = "a-brand-new-passphrase";
+const OLD = "Correct-horse-battery-7";
+const NEW = "A-brand-new-passphrase-9";
 const WRONG = "wrong-horse-battery";
 
 let counter = 0;
@@ -169,12 +170,12 @@ test("a limiter that can't be written fails closed: refused, flagged as an outag
   }
 });
 
-test("a too-short, mismatched, same-as-current, empty or oversize input is refused with nothing written", async () => {
+test("a weak, mismatched, same-as-current, empty or oversize input is refused with nothing written", async () => {
   const before = await storedHash();
-  const short = "x".repeat(PASSWORD_MIN_LENGTH - 1);
-  const long = "y".repeat(PASSWORD_MAX_LENGTH + 1);
+  const short = "Ab1!".padEnd(PASSWORD_MIN_LENGTH - 1, "x");
+  const long = "Ab1!".padEnd(PASSWORD_MAX_LENGTH + 1, "x");
 
-  await assertRefused(await change({ new: short, confirm: short }), "/account?error=password-short", before);
+  await assertRefused(await change({ new: short, confirm: short }), "/account?error=password-weak", before);
   await assertRefused(await change({ confirm: `${NEW}!` }), "/account?error=password-mismatch", before);
   await assertRefused(await change({ new: OLD, confirm: OLD }), "/account?error=password-same", before);
   await assertRefused(await change({ current: "" }), "/account?error=password-invalid", before);
@@ -183,14 +184,60 @@ test("a too-short, mismatched, same-as-current, empty or oversize input is refus
   await assertRefused(await change({ confirm: long }), "/account?error=password-invalid", before);
 
   // Exactly the limits are fine: the floor and the cap.
-  const floor = "z".repeat(PASSWORD_MIN_LENGTH);
+  const floor = "Ab1!".padEnd(PASSWORD_MIN_LENGTH, "x");
   assert.equal((await change({ new: floor, confirm: floor })).redirect, "/account?saved=password");
-  const cap = "w".repeat(PASSWORD_MAX_LENGTH);
+  const cap = "Ab1!".padEnd(PASSWORD_MAX_LENGTH, "x");
   assert.equal((await change({ current: floor, new: cap, confirm: cap })).redirect, "/account?saved=password");
 });
 
+test("a new password missing any one rule is refused, even when confirmed, with nothing written", async () => {
+  const before = await storedHash();
+  const weak = [
+    "Short-1!aB", // too short
+    "No-number-here-Abc!", // no number
+    "no-capital-here-123!", // no capital
+    "NoSymbolHere1234", // no symbol
+    "No symbol here 1234", // spaces are not symbols
+  ];
+  for (const password of weak) {
+    await assertRefused(await change({ new: password, confirm: password }), "/account?error=password-weak", before);
+  }
+  // The rule is checked before the mismatch, so what to fix is said first.
+  await assertRefused(await change({ new: "no-number-here-Abc!", confirm: "other" }), "/account?error=password-weak", before);
+});
+
+test("an account whose password breaks the rule can still log in and change it to a compliant one", async () => {
+  // Made before the rule: inserted directly, as sign-up would now refuse it.
+  const legacy = "correct-horse-battery";
+  assert.ok(!passwordMeetsRules(legacy));
+  const created = await createUser({
+    email: `legacy${counter}@example.com`,
+    passwordHash: await hashPassword(legacy),
+    homeClubId: "omagh",
+  });
+  assert.equal(created.result, "created");
+  if (created.result !== "created") return;
+  const old = created.user;
+
+  const formData = new FormData();
+  formData.set("email", old.email);
+  formData.set("password", legacy);
+  assert.equal((await submitLogin(formData, { now: NOW, ip: IP_B })).session?.id, old.id);
+
+  // The current password is never rule-checked; only the new one is.
+  const attempt = (next: string) => {
+    const change = new FormData();
+    change.set("current", legacy);
+    change.set("new", next);
+    change.set("confirm", next);
+    return submitPasswordChange(old, change, { now: NOW, ip: IP_A });
+  };
+  assert.deepEqual(await attempt("another-weak-password"), { redirect: "/account?error=password-weak" });
+  assert.equal((await attempt(NEW)).redirect, "/account?saved=password");
+});
+
 test("these refusals cost no attempt: the limiter isn't touched", async () => {
-  const short = "x".repeat(PASSWORD_MIN_LENGTH - 1);
+  const short = "Ab1!".padEnd(PASSWORD_MIN_LENGTH - 1, "x");
   for (let i = 0; i < LOGIN_FAILURE_LIMIT * 2; i++) await change({ new: short, confirm: short, current: WRONG });
   assert.equal((await getDb().select().from(loginAttempt)).length, 0);
   assert.equal((await change({})).redirect, "/account?saved=password");
@@ -240,8 +287,8 @@ test("a stale-hash write is refused and writes nothing", async () => {
 
 test("two changes racing from the same old password: one wins, the other writes nothing", async () => {
   const [a, b] = await Promise.all([
-    change({ new: "first-racing-passphrase", confirm: "first-racing-passphrase" }),
-    change({ new: "second-racing-passphrase", confirm: "second-racing-passphrase" }, account, IP_B),
+    change({ new: "First-racing-passphrase-1", confirm: "First-racing-passphrase-1" }),
+    change({ new: "Second-racing-passphrase-2", confirm: "Second-racing-passphrase-2" }, account, IP_B),
   ]);
   const results = [a, b];
   const winners = results.filter((result) => result.session);
@@ -251,8 +298,8 @@ test("two changes racing from the same old password: one wins, the other writes 
 
   const stored = await storedHash();
   assert.equal(stored, winners[0]?.session?.passwordHash);
-  assert.ok(await verifyPassword(a.session ? "first-racing-passphrase" : "second-racing-passphrase", stored));
-  assert.ok(!(await verifyPassword(a.session ? "second-racing-passphrase" : "first-racing-passphrase", stored)));
+  assert.ok(await verifyPassword(a.session ? "First-racing-passphrase-1" : "Second-racing-passphrase-2", stored));
+  assert.ok(!(await verifyPassword(a.session ? "Second-racing-passphrase-2" : "First-racing-passphrase-1", stored)));
 });
 
 test("the user row's other columns are untouched by a change", async () => {

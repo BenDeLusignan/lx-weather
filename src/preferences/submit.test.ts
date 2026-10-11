@@ -158,7 +158,7 @@ test("log in and sign up carry the account's theme, so the device's theme cookie
 
   const signup = new FormData();
   signup.set("email", "fresh@example.com");
-  signup.set("password", "correct-horse-battery");
+  signup.set("password", "Correct-horse-battery-7");
   signup.set("homeClub", "omagh");
   assert.equal((await submitSignUp(signup, { now: NOW, ip: "198.51.100.21" })).session?.theme, "system");
 });

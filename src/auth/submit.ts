@@ -9,7 +9,7 @@ import { hashPassword, verifyPassword } from "@/auth/password";
 import { isClubId } from "@/clubs/lookup";
 import { admitAttempt, settleSuccess, type Reservation } from "@/data/attempts";
 import { lockoutWaitMinutes } from "@/data/attempt-rules";
-import { EMAIL_MAX_LENGTH, PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH } from "@/data/limits";
+import { EMAIL_MAX_LENGTH, PASSWORD_MAX_LENGTH } from "@/data/limits";
 import {
   changePasswordHash,
   createUser,
@@ -19,6 +19,7 @@ import {
   type User,
 } from "@/data/users";
 import { parseEmail } from "@/forms/fields";
+import { passwordMeetsRules } from "@/forms/password-rules";
 import type { ThemeChoice } from "@/preferences/preferences";
 
 /**
@@ -141,10 +142,10 @@ function signUpRefused(error: SignUpError): SubmitResult {
  * Sign up: email, password and a home club from the list; signing up logs
  * you in. Nothing is written until every check has passed.
  *
- * The checks that don't touch the database (a valid-looking email, a long
- * enough password, a club in `CLUBS`) come first and say what to fix: they
- * can't reveal anything about other accounts. Then the attempt is counted,
- * and an email that's already taken gets the same generic `failed` as any
+ * The checks that don't touch the database (a valid-looking email, a password
+ * that meets `passwordMeetsRules`, a club in `CLUBS`) come first and say what
+ * to fix: they can't reveal anything about other accounts. Then the attempt is
+ * counted, and an email that's already taken gets the same generic `failed` as any
  * other refusal that depends on the database, counted as a failure and after
  * the same scrypt run as a success, so neither the message nor the timing
  * says which it was. (Without email verification a sign-up refusal can still
@@ -156,7 +157,7 @@ export async function submitSignUp(formData: FormData, context: AttemptContext):
   if (!email) return signUpRefused("email");
 
   const password = formData.get("password");
-  if (typeof password !== "string" || password.length < PASSWORD_MIN_LENGTH || password.length > PASSWORD_MAX_LENGTH) {
+  if (typeof password !== "string" || !passwordMeetsRules(password)) {
     return signUpRefused("password");
   }
 
@@ -209,7 +210,7 @@ export async function submitHomeClubChange(user: User | null, formData: FormData
  */
 export type PasswordChangeError =
   | "password-invalid"
-  | "password-short"
+  | "password-weak"
   | "password-mismatch"
   | "password-same"
   | "password-wrong"
@@ -226,7 +227,8 @@ function passwordRefused(error: PasswordChangeError): SubmitResult {
  *
  * The checks that need no database come first and say what to fix: every field
  * is a string within bounds (a hand-made request can send anything), the new
- * password is long enough, it equals its confirmation, and it differs from the
+ * password meets `passwordMeetsRules` (only the new one: the current password
+ * may predate the rule), it equals its confirmation, and it differs from the
  * current one. They only compare what the user typed, so they reveal nothing
  * and cost no attempt. Then the attempt is counted and the current password is
  * checked against the stored hash: this is the guess the limiter exists for, so
@@ -260,7 +262,7 @@ export async function submitPasswordChange(
   ) {
     return passwordRefused("password-invalid");
   }
-  if (next.length < PASSWORD_MIN_LENGTH) return passwordRefused("password-short");
+  if (!passwordMeetsRules(next)) return passwordRefused("password-weak");
   if (next !== confirm) return passwordRefused("password-mismatch");
   if (next === current) return passwordRefused("password-same");
 

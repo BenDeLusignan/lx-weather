@@ -5,7 +5,7 @@
  * first. Pure (no `server-only`) so any component can use them.
  */
 
-/** A password's floor, as on LX Tennis. */
+/** A password's floor: Ben's decision of 11 Oct 2026, with the rest of the rule in `src/forms/password-rules.ts`. */
 export const PASSWORD_MIN_LENGTH = 12;
 
 /** Bounds what anyone can make scrypt chew on. */

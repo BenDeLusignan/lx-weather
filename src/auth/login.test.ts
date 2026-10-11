@@ -8,8 +8,10 @@ import { IP_FAILURE_LIMIT, LOGIN_FAILURE_LIMIT } from "@/data/limits";
 import { createUser } from "@/data/users";
 import { getDb } from "@/db/client";
 import { loginAttempt } from "@/db/schema";
+import { passwordMeetsRules } from "@/forms/password-rules";
 
 const EMAIL = "login@example.com";
+// Deliberately breaks the password rule (no number, capital or symbol): accounts made before it must keep working.
 const PASSWORD = "correct-horse-battery";
 const WRONG = "wrong-horse-battery";
 
@@ -111,4 +113,14 @@ test("one address trying many emails is locked as a whole", async () => {
   // Not the email that was guessed: the address itself is locked now.
   assert.deepEqual(await attempt({}, NOW, IP_A), { redirect: "/?locked=1" });
   assert.equal((await attempt({}, NOW, IP_B)).redirect, "/");
+});
+
+test("login never applies the password rule: even a short, plain password still logs in", async () => {
+  const plain = "abc";
+  assert.ok(!passwordMeetsRules(plain));
+  const created = await createUser({ email: "plain@example.com", passwordHash: await hashPassword(plain), homeClubId: "omagh" });
+  assert.equal(created.result, "created");
+  const result = await attempt({ email: "plain@example.com", password: plain }, NOW, IP_A);
+  assert.equal(result.redirect, "/");
+  assert.equal(result.session?.id, created.result === "created" ? created.user.id : undefined);
 });

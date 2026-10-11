@@ -42,6 +42,11 @@
  *   border on bg / surface (a divider; in light a card is the 1.1 tint of
  *   surface on the white page plus this edge)  1.7 /  1.6             1.8 /  1.5
  *
+ * The password checklist (new-password-input.module.css; no new token): its
+ * empty ring is text-muted on surface (needs 3) 6.9 / 6.6, and its met row
+ * is a success disc on surface 6.2 / 7.7 with the tick drawn in surface on
+ * the disc, the same pair, 6.2 / 7.7. Its words are text on surface.
+ *
  * The header (light blue in the light theme, black in the dark; the numbers
  * for each theme's own header):
  *   header-text on header-bg / header-hover    7.0 / 8.9            19.3 / 12.8
