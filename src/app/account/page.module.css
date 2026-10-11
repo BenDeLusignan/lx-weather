@@ -1,0 +1,24 @@
+.details {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: var(--space-1) var(--space-4);
+  margin: 0 0 var(--space-6);
+}
+
+.details dt {
+  color: var(--color-text-muted);
+}
+
+.details dd {
+  margin: 0;
+}
+
+.form {
+  display: grid;
+  gap: var(--space-4);
+  max-width: 24rem;
+}
+
+.logOut {
+  margin-top: var(--space-8);
+}

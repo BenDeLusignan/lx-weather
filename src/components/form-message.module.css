@@ -1,0 +1,15 @@
+.message {
+  margin: 0;
+  padding: var(--space-3);
+  border-left: 4px solid currentColor;
+  background: var(--color-surface);
+  font-weight: 600;
+}
+
+.error {
+  color: var(--color-error);
+}
+
+.success {
+  color: var(--color-success);
+}

@@ -1,0 +1,110 @@
+/*
+ * Neutral first look. Every colour, font and size scale the site uses is
+ * defined here once, as a CSS custom property; components reference these
+ * tokens, never raw colour values, so the whole site can be restyled from this
+ * block without touching any logic.
+ */
+:root {
+  color-scheme: light;
+
+  /* Surfaces and text */
+  --color-bg: #ffffff;
+  --color-surface: #f4f5f7;
+  --color-border: #c9ced6;
+  --color-text: #1b1f24;
+  --color-text-muted: #4a525c;
+  --color-link: #0b4f9c;
+  --color-focus: #0b4f9c;
+  --color-error: #a11a1a;
+  --color-success: #17632a;
+
+  /* Buttons */
+  --color-button-bg: #1b1f24;
+  --color-button-text: #ffffff;
+
+  /*
+   * The traffic lights (vision, Core flow 3). Every light is also written out
+   * in words on screen ("Good", "Passable", "Unlikely", "Unknown"), so colour
+   * is never the only cue.
+   */
+  --light-good: #1f8a3b;
+  --light-passable: #d99a00;
+  --light-unlikely: #c62828;
+  --light-unknown: #7a828c;
+
+  /* Type and space */
+  --font-body: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --radius: 0.5rem;
+  --content-width: 44rem;
+  --touch-target: 2.75rem;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.5;
+  /* A long word or address must wrap, never push the page wider than the screen. */
+  overflow-wrap: break-word;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.25;
+}
+
+a {
+  color: var(--color-link);
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+/* Visible only when focused: the first stop for keyboard users. */
+.skip-link {
+  position: absolute;
+  left: var(--space-2);
+  top: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  background: var(--color-button-bg);
+  color: var(--color-button-text);
+  transform: translateY(-200%);
+}
+
+.skip-link:focus {
+  transform: none;
+  z-index: 10;
+}
+
+/* Text for screen readers only. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

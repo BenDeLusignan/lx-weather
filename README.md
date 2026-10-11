@@ -4,16 +4,72 @@ A weather app for tennis players in Northern Ireland. It combines the forecasts 
 
 **Read [`docs/vision.md`](docs/vision.md) first.** It's the single source of truth for what we're building: what's decided, what's still open, and the rules we build by.
 
-## Status
+## Stack
 
-Only the forecast engine and the club list are built (`src/forecast/`, `src/clubs/`): it fetches the five providers for a latitude/longitude and combines them into a week of hour blocks with a traffic light each. There is no web app, database or users yet. See "Current state" in the vision doc.
+- [Next.js](https://nextjs.org) 16 (App Router, Cache Components) + TypeScript, React 19
+- Plain CSS / CSS Modules, no Tailwind. Every colour is a custom property in `src/app/globals.css`
+- SQLite through [Drizzle ORM](https://orm.drizzle.team) and `@libsql/client`: a local file in development, [Turso](https://turso.tech) later by changing `DATABASE_URL`
+- Forecasts from [Open-Meteo](https://open-meteo.com) (five models, no key), cached on the server for up to an hour per club
+
+## Setup
+
+Requires Node.js 20.9 or newer.
+
+1. **Install:**
+
+   ```sh
+   npm install
+   ```
+
+2. **Environment:** copy the example and set `SESSION_SECRET` (the comments in the file say how to generate one). `.env.local` is gitignored; never commit it.
+
+   ```sh
+   cp .env.example .env.local
+   ```
+
+   | Variable | What it is |
+   | --- | --- |
+   | `DATABASE_URL` | `file:local.db` for a local SQLite file in the repo root (gitignored), or a `libsql://…turso.io` URL for Turso |
+   | `DATABASE_AUTH_TOKEN` | Turso only; empty for a local file |
+   | `SESSION_SECRET` | At least 32 random characters; signs the login cookie and hashes the failed-login counters' keys. Changing it logs everyone out and forgets recent failed attempts |
+
+3. **Create the database:** applies the migrations in `drizzle/` (the `user` and `login_attempt` tables). Run it again after pulling new migrations; it only applies the ones that are missing.
+
+   ```sh
+   npm run db:migrate
+   ```
+
+4. **Run it:** `npm run dev`, then open http://localhost:3000 and sign up.
 
 ## Commands
 
 ```sh
-npm install
-npm test                                     # unit tests (fake data, no network)
-npx tsc --noEmit                             # type check
-npm run forecast -- enniskillen              # live week for a club (id from src/clubs/clubs.ts)
+npm run dev              # dev server at http://localhost:3000
+npm run build            # production build
+npm run start            # serve the production build
+npm run lint             # ESLint
+npm test                 # tests (tsx --test): accounts, the login limiter, sessions, home club, club list, display formatting, the forecast engine. Uses throwaway databases, never local.db; no network
+npx tsc --noEmit         # type check
+npm run db:generate      # after editing src/db/schema.ts: write the SQL migration into drizzle/
+npm run db:migrate       # apply pending migrations in drizzle/ to DATABASE_URL
+npm run forecast -- enniskillen              # live week for a club (id from src/clubs/clubs.ts), printed in the terminal
 npm run forecast -- <latitude> <longitude>   # live week for any point
 ```
+
+## Routes
+
+| Route | What |
+| --- | --- |
+| `/` | Logged out: log in. Logged in: your home club's week |
+| `/signup` | Email, password (12+ characters), home club |
+| `/away` | The other clubs, alphabetical |
+| `/away/[clubId]` | The same week screen for that club |
+| `/account` | Email, change home club, log out |
+
+## Gotchas
+
+- **`PageProps` / `LayoutProps` are generated types.** Next creates them in `.next/` (gitignored), so on a fresh clone your editor and `tsc` will report them as missing until you run `npm run dev`, `npm run build` or `npx next typegen` once.
+- **`npm test` runs `tsx --conditions=react-server`.** Server-side modules import `server-only`, which throws when loaded outside the React server environment; that flag tells Node to load the server build of it. Don't remove it from `package.json`, or the tests will fail on import.
+- **`next dev` rewrites part of `AGENTS.md`.** When it detects an AI coding agent and the Next.js block is missing or out of date, it rewrites everything between the `<!-- BEGIN:nextjs-agent-rules -->` and `<!-- END:nextjs-agent-rules -->` markers. Don't edit inside those markers; put project notes outside them.
+- **The forecast cache is in memory.** It lasts as long as the server process and isn't shared between serverless instances, so on Vercel an instance may fetch again sooner than an hour. That only costs Open-Meteo calls, never stale data.
+- **Migrations are the schema's history.** Commit the generated files in `drizzle/` together with the `src/db/schema.ts` change, and never edit a migration that has already been applied; add a new one.
