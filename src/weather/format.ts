@@ -40,6 +40,26 @@ export function providerCountNote(count: number): string | null {
   return count > 0 && count < PROVIDER_TOTAL ? `${count} of ${PROVIDER_TOTAL} providers` : null;
 }
 
+/** Wind in mph alone, for the small hour box (Product rule 4's one exception to showing both units). `null` is no data. */
+export function formatWindMph(mph: number | null): string {
+  return mph === null ? "no data" : `${round(mph, 0)} mph`;
+}
+
+/** The hour box's stand-in for a figure it has no data for, in the same place the number would be. */
+export const NO_DATA_MARK = "–";
+
+/**
+ * What a screen reader hears for the box's two figures: "mph" and "%" are
+ * often read as letters or dropped, so the words are spelled out.
+ */
+export function spokenRainChance(percent: number | null): string {
+  return percent === null ? "rain, no data" : `rain ${round(percent, 0)} percent`;
+}
+
+export function spokenWindSpeed(mph: number | null): string {
+  return mph === null ? "wind, no data" : `wind ${round(mph, 0)} miles per hour`;
+}
+
 /** `8` becomes `08:00`. */
 export function hourLabel(hour: number): string {
   return `${String(hour).padStart(2, "0")}:00`;

@@ -56,11 +56,16 @@
   gap: var(--space-1);
 }
 
+/* The same height as the real cell (hour-cell.module.css): 6.25rem here, 6.75rem from 48rem. */
 .cell {
-  height: 5.5rem;
+  height: 6.25rem;
 }
 
 @media (min-width: 48rem) {
+  .cell {
+    height: 6.75rem;
+  }
+
   .cells {
     grid-template-columns: repeat(12, minmax(0, 1fr));
     gap: var(--space-2);

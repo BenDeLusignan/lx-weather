@@ -19,8 +19,12 @@
   align-items: center;
   justify-content: center;
   gap: 0.125rem;
-  height: 100%;
-  min-height: 5rem;
+  /*
+   * A fixed height, not a minimum: every box is the same size in every state
+   * (Core flow 3), so nothing in it may make it grow. It holds five lines (hour,
+   * shape, word, rain, wind). Keep loading.module.css's .cell the same height.
+   */
+  height: 6.25rem;
   padding: var(--space-1) 0;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
@@ -91,13 +95,10 @@
   letter-spacing: -0.02em;
 }
 
-.rain {
+/* Rain % and wind mph: one line each, never wrapped ("100%" and "29 mph" are the longest). */
+.figure {
   font-variant-numeric: tabular-nums;
-}
-
-/* "4 of 5": the rain figure is built from fewer than five providers (Team convention 1). */
-.count {
-  font-size: 0.6875rem;
+  white-space: nowrap;
 }
 
 /*
@@ -132,11 +133,7 @@
      * 14px from about 1000px. Re-check at 768 if you change the gap or the gutters.
      */
     font-size: clamp(0.6875rem, 1.724vw - 0.162rem, var(--font-size-sm));
-    min-height: 5.5rem;
-  }
-
-  .count {
-    font-size: var(--font-size-xs);
+    height: 6.75rem;
   }
 
   .card {

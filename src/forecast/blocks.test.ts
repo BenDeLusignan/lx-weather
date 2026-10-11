@@ -142,6 +142,15 @@ test("the lights follow the rounded figures and the block takes the worse", () =
   assert.equal(gale?.light, "red");
 });
 
+test("Ben's rain limit reaches the block: 30% with calm wind is green, 31% is yellow", () => {
+  const now = new Date(MIDNIGHT_11_OCT);
+  const at = (rain: number) =>
+    buildWeek(constantWeek({ temp: 10, rain, wind: 2 }), { now })[0]?.blocks[0];
+  assert.equal(at(30)?.light, "green");
+  assert.equal(at(31)?.rainLight, "yellow");
+  assert.equal(at(31)?.light, "yellow");
+});
+
 test("a block with no data is returned with null figures and a null light, never dropped or zero", () => {
   // The forecast covers day one only; days two to seven have no stamps at all.
   const oneDay = forecastOf(MIDNIGHT_11_OCT, 25, {
