@@ -1,0 +1,59 @@
+rain_mode,forecaster,leads,bin,n,observed
+binary,current blend,1-2,-0.01-0.10,9629,0.04819
+binary,current blend,1-2,0.10-0.30,3874,0.18121
+binary,current blend,1-2,0.30-0.50,2828,0.28854
+binary,current blend,1-2,0.50-0.70,2499,0.39216
+binary,current blend,1-2,0.70-0.90,2262,0.53758
+binary,current blend,1-2,0.90-1.01,2014,0.70904
+binary,current blend,3-4,-0.01-0.10,8114,0.07148
+binary,current blend,3-4,0.10-0.30,4488,0.20455
+binary,current blend,3-4,0.30-0.50,3604,0.28330
+binary,current blend,3-4,0.50-0.70,3125,0.37440
+binary,current blend,3-4,0.70-0.90,2350,0.46681
+binary,current blend,3-4,0.90-1.01,1425,0.57544
+binary,current blend,5-6,-0.01-0.10,6258,0.08677
+binary,current blend,5-6,0.10-0.30,5250,0.20419
+binary,current blend,5-6,0.30-0.50,4976,0.29120
+binary,current blend,5-6,0.50-0.70,3921,0.36802
+binary,current blend,5-6,0.70-0.90,2053,0.41013
+binary,current blend,5-6,0.90-1.01,648,0.39660
+binary,Met Office alone,1-2,-0.01-0.50,16886,0.14639
+binary,Met Office alone,1-2,0.50-1.01,6220,0.50386
+binary,Met Office alone,3-4,-0.01-0.50,15326,0.16932
+binary,Met Office alone,3-4,0.50-1.01,7780,0.38702
+binary,Met Office alone,5-6,-0.01-0.50,14937,0.19321
+binary,Met Office alone,5-6,0.50-1.01,8169,0.33297
+binary,ECMWF alone,1-2,-0.01-0.50,14278,0.11507
+binary,ECMWF alone,1-2,0.50-1.01,8828,0.44891
+binary,ECMWF alone,3-4,-0.01-0.50,14246,0.15654
+binary,ECMWF alone,3-4,0.50-1.01,8860,0.38104
+binary,ECMWF alone,5-6,-0.01-0.50,13283,0.18558
+binary,ECMWF alone,5-6,0.50-1.01,9823,0.31976
+calibrated,current blend,1-2,0.10-0.30,16956,0.12845
+calibrated,current blend,1-2,0.30-0.50,4543,0.48668
+calibrated,current blend,1-2,0.50-0.70,1492,0.74732
+calibrated,current blend,1-2,0.70-0.90,115,0.88696
+calibrated,current blend,3-4,0.10-0.30,17846,0.17113
+calibrated,current blend,3-4,0.30-0.50,5009,0.47455
+calibrated,current blend,3-4,0.50-0.70,251,0.69721
+calibrated,current blend,5-6,0.10-0.30,20385,0.22026
+calibrated,current blend,5-6,0.30-0.50,2721,0.41014
+calibrated,Met Office alone,1-2,0.10-0.30,16886,0.14639
+calibrated,Met Office alone,1-2,0.30-0.50,2963,0.40027
+calibrated,Met Office alone,1-2,0.50-0.70,2967,0.59117
+calibrated,Met Office alone,1-2,0.70-0.90,290,0.66897
+calibrated,Met Office alone,3-4,0.10-0.30,17766,0.18642
+calibrated,Met Office alone,3-4,0.30-0.50,4029,0.40432
+calibrated,Met Office alone,3-4,0.50-0.70,1311,0.50725
+calibrated,Met Office alone,5-6,0.10-0.30,17668,0.20930
+calibrated,Met Office alone,5-6,0.30-0.50,5438,0.35086
+calibrated,ECMWF alone,1-2,-0.01-0.10,1752,0.16495
+calibrated,ECMWF alone,1-2,0.10-0.30,13722,0.13176
+calibrated,ECMWF alone,1-2,0.30-0.50,4624,0.35446
+calibrated,ECMWF alone,1-2,0.50-0.70,2633,0.62172
+calibrated,ECMWF alone,1-2,0.70-0.90,375,0.62133
+calibrated,ECMWF alone,3-4,0.10-0.30,16913,0.17915
+calibrated,ECMWF alone,3-4,0.30-0.50,4554,0.37571
+calibrated,ECMWF alone,3-4,0.50-0.70,1639,0.52776
+calibrated,ECMWF alone,5-6,0.10-0.30,18686,0.21390
+calibrated,ECMWF alone,5-6,0.30-0.50,4420,0.36403
