@@ -15,12 +15,13 @@ export const metadata: Metadata = {
     "Hour-by-hour playing conditions for tennis clubs in Northern Ireland, from five forecast providers combined.",
 };
 
-// The browser's address bar on a phone. These two mirror --color-bg in
-// globals.css (light, then dark); update them together. They can only follow
-// the device, not the user's choice on the Account page.
+// The browser's address bar on a phone. These two mirror --color-header-bg in
+// globals.css (light, then dark; the bar sits right above the header on every
+// logged-in screen); update them together. They can only follow the device,
+// not the user's choice on the Account page.
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#eef4f8" },
+    { media: "(prefers-color-scheme: light)", color: "#7ab8f5" },
     { media: "(prefers-color-scheme: dark)", color: "#000000" },
   ],
 };

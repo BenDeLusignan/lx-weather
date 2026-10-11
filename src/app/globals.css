@@ -1,7 +1,8 @@
 /*
  * LX Weather: a calm, professional look in the manner of Apple Weather, in a
- * light and a dark theme (Ben's decision, see vision, Theme). Light is the
- * pale sky-blue theme; dark is pure black with Apple's dark greys for cards
+ * light and a dark theme (Ben's decision, see vision, Theme). Light is a white
+ * page under a light-blue header, with one deep blue for every button and link;
+ * dark is pure black with Apple's dark greys for cards
  * and one blue accent. No purple, no pink, no glows. The traffic lights are
  * the only strong colours on the page.
  *
@@ -23,44 +24,50 @@
  * Contrast, WCAG 2.x (AA: 4.5:1 for text, 3:1 for icons and control edges),
  * measured with the WCAG relative-luminance formula. Light theme, then dark:
  *
- *   text on bg / surface / surface-sunken     14.7 / 16.3 / 13.5     19.3 / 15.6 / 12.8
- *   text-muted on bg / surface / sunken        6.7 /  7.4 /  6.1      8.2 /  6.6 /  5.4
- *   link on bg / surface / sunken              6.6 /  7.4 /  6.1      7.4 /  6.0 /  4.9
- *   error on bg / surface / sunken             6.8 /  7.6 /  6.2      7.4 /  6.0 /  4.9
- *   success on bg / surface / sunken           6.0 /  6.7 /  5.5      9.5 /  7.7 /  6.3
+ *   text on bg / surface / surface-sunken     16.3 / 15.1 / 13.5     19.3 / 15.6 / 12.8
+ *   text-muted on bg / surface / sunken        7.4 /  6.9 /  6.1      8.2 /  6.6 /  5.4
+ *   link on bg / surface / sunken              7.4 /  6.8 /  6.1      7.4 /  6.0 /  4.9
+ *   error on bg / surface / sunken             7.6 /  7.0 /  6.2      7.4 /  6.0 /  4.9
+ *   success on bg / surface / sunken           6.7 /  6.2 /  5.5      9.5 /  7.7 /  6.3
  *   button-text on button-bg                   7.4                    7.4
  *   button-text on the hover fill (85% fill)   8.3                    8.6
- *   button-bg on bg / surface (needs 3)        6.6 /  7.4             7.4 /  6.0
- *   focus on bg / surface / sunken (needs 3)   6.6 /  7.4 /  6.1      7.4 /  6.0 /  4.9
+ *   button-bg on bg / surface (needs 3)        7.4 /  6.8             7.4 /  6.0
+ *   The outlined button's edge is button-bg in light (7.4 / 6.8, and 6.1 on
+ *   the sunken hover fill) and border-strong in dark (below).
+ *   focus on bg / surface / sunken (needs 3)   7.4 /  6.8 /  6.1      7.4 /  6.0 /  4.9
  *   border-strong on bg / surface / sunken (needs 3)
- *                                              3.6 /  4.0 /  3.3      6.4 /  5.2 /  4.3
+ *                                              4.0 /  3.7 /  3.3      6.4 /  5.2 /  4.3
  *   text on field-bg                          16.3                   12.8
  *   border-strong on field-bg (needs 3)        4.0                    4.3
- *   border on bg / surface (a divider, the fills already differ)
- *                                              1.6 /  1.7             1.8 /  1.5
+ *   border on bg / surface (a divider; in light a card is the 1.1 tint of
+ *   surface on the white page plus this edge)  1.7 /  1.6             1.8 /  1.5
  *
- * The header (always dark; the numbers for each theme's own header):
- *   header-text on header-bg / header-hover    16.0 / 11.6            19.3 / 12.8
- *   header-focus on header-bg / header-hover (needs 3)    9.5 / 6.9   7.4 / 4.9
- *   header-border on header-bg (a decorative divider)     2.1         1.8
- *   header-bg on the page: 16.3 in the light theme (the only dark band); 1.0
- *   in the dark theme, where both are black and the hairline header-border
- *   is what parts them (Ben's "darker than the body" cannot hold on black).
+ * The header (light blue in the light theme, black in the dark; the numbers
+ * for each theme's own header):
+ *   header-text on header-bg / header-hover    7.0 / 8.9            19.3 / 12.8
+ *   header-focus on header-bg / header-hover (needs 3)    7.0 / 8.9   7.4 / 4.9
+ *   header-border on header-bg (a decorative divider)     1.5         1.8
+ *   header-bg on the page: 2.1 in the light theme (a blue band on white, the
+ *   hue parts them as well); 1.0 in the dark theme, where both are black and
+ *   the hairline header-border is what parts them.
  *   The skip link's focus ring is header-focus with a header-bg halo. Ring on
- *   the halo 9.5 (light) / 7.4 (dark); on a logged-out page the halo is what
- *   frames it in the light theme (halo on page 16.3); in the dark theme page
- *   and halo are both black and the ring on black is 7.4.
+ *   the halo 7.0 (light) / 7.4 (dark); the button on the halo 3.5 (light),
+ *   its white text on it 7.4. On a logged-out page the halo is a light-blue
+ *   frame on white (2.1) and the ring on white is 14.7; in the dark theme
+ *   page and halo are both black and the ring on black is 7.4.
  *
  * The brand mark (the same in both themes): the white cloud on the tile 7.4
- * and the lime ball on the tile 5.6, both over 3. The tile on header-bg is 2.5
- * (light) and 2.9 (dark), on the dark page 2.9, a touch under 3; the dark
- * theme adds mark-edge, a ring of #2f7fb3 that is 4.8 on black, so the tile's
- * edge is clear there. The mark is decorative (aria-hidden, the words beside
- * it are the name), and in the light theme the tile is as it was.
+ * and the lime ball on the tile 5.6, both over 3. The tile on header-bg is 3.5
+ * (light, 4.4 on the hover fill, 7.4 on a white page) and 2.9 (dark), on the
+ * dark page 2.9, a touch under 3; the dark theme adds mark-edge, a ring of
+ * #2f7fb3 that is 4.8 on black, so the tile's edge is clear there; the light
+ * theme needs none. The mark is decorative (aria-hidden, the words beside
+ * it are the name).
  *
  * Traffic lights (a cell's text on its own fill; the icon's fill on that fill,
  * needs 3; the card's open ring is --color-text, which is 12.5 to 14.1 on
- * every light cell in the light theme and 12.2 to 13.2 in the dark):
+ * every light cell in the light theme (16.3 on the white page) and 12.2 to
+ * 13.2 in the dark):
  *   good      text 8.8 / icon 4.4        text 11.0 / icon 6.7
  *   passable  text 8.9 / icon 2.1 *      text 10.6 / icon 7.4
  *   unlikely  text 8.3 / icon 5.0        text 10.8 / icon 5.1
@@ -68,7 +75,7 @@
  *   * Amber is light by nature, so the passable triangle is also outlined in the
  *     dark text colour (8.9:1); its shape never depends on the amber fill.
  * A Notice's left edge is the passable (warning) or unlikely (problem) icon
- * colour on the card: 2.4 / 6.5 light, 9.5 / 6.0 dark. The light warning edge
+ * colour on the card: 2.2 / 6.1 light, 9.5 / 6.0 dark. The light warning edge
  * is under 3, but it only tints the edge: the Notice's words carry the meaning
  * and the card has its own border, so nothing depends on that colour.
  *
@@ -95,10 +102,12 @@
    * Surfaces and text: light-dark(light value, dark value). The dark values
    * are Apple's dark greys on pure black: the page is black, a card is the
    * first grey, and `surface-sunken` is the second, lighter grey (a hover
-   * fill, the inside of an input). In the light theme sunken is the darker step.
+   * fill, the inside of an input). In the light theme the page is white (Ben,
+   * 11 Oct 2026), so a card is a very light blue-grey with its quiet border,
+   * and `surface-sunken` is the darker step of it.
    */
-  --color-bg: light-dark(#eef4f8, #000000);
-  --color-surface: light-dark(#ffffff, #1c1c1e);
+  --color-bg: light-dark(#ffffff, #000000);
+  --color-surface: light-dark(#f3f7fa, #1c1c1e);
   --color-surface-sunken: light-dark(#e1ebf2, #2c2c2e);
   --color-border: light-dark(#b7c7d3, #38383a);
   /* The edge of a control (input, select): needs 3:1 to be seen. */
@@ -110,11 +119,14 @@
   --color-focus: light-dark(#0a5a8c, #409cff);
   --color-error: light-dark(#a3201a, #ff6961);
   --color-success: light-dark(#176a31, #34c759);
+  /* The one button colour (Ben: "make the button colours the same colour"): every filled button, every outline and every link is this blue. */
   --color-button-bg: light-dark(#0a5a8c, #409cff);
   /* White on the deep blue; black on the lighter dark-theme blue (white would be 2.8). */
   --color-button-text: light-dark(#ffffff, #000000);
-  /* An input sits one level above the card it is in: white on white in light, the second grey on the first in dark. */
-  --color-field-bg: light-dark(var(--color-surface), var(--color-surface-sunken));
+  /* The outlined button's edge: the button blue in light (one colour family), the neutral grey in dark, as it was. */
+  --color-button-border: light-dark(var(--color-button-bg), var(--color-border-strong));
+  /* An input sits one level above the card it is in: white on the light blue-grey card in light, the second grey on the first in dark. */
+  --color-field-bg: light-dark(#ffffff, var(--color-surface-sunken));
   /* A card that floats (the hour card): a soft shadow in light, a lifted edge and a deep shadow in dark, where a shadow alone vanishes on black. */
   --shadow-raised:
     0 0.25rem 1.25rem light-dark(rgb(16 34 46 / 0.18), rgb(0 0 0 / 0.6)),
@@ -125,6 +137,7 @@
    * themes. src/app/icon.svg hard-codes these three (see vision.md "Theme").
    * `mark-edge` is a hairline ring round the tile, only in the dark theme: the
    * tile on black is 2.9:1, a touch under the 3 it needs, and the ring lifts it.
+   * The light theme needs none: the tile is 3.5:1 on the light blue header.
    */
   --color-mark-bg: #0a5a8c;
   --color-mark-cloud: #ffffff;
@@ -132,18 +145,21 @@
   --color-mark-edge: light-dark(transparent, #2f7fb3);
 
   /*
-   * The header is dark in both themes (Ben: "the header should always be
-   * dark"): the deep blue-black band in the light theme, and black in the dark
-   * theme, where the page is black too, so there it is parted from the page
-   * by its hairline `border` instead of by a darker fill. `hover` is the quiet
-   * buttons' hover fill and `focus` the keyboard ring; both are scoped to the
-   * header (site-header.module.css).
+   * The header (Ben, 11 Oct 2026: "make the header a light blue, like the blue
+   * in the apple weather app", for the light theme; the dark theme's header
+   * stays black, which is the dark page's colour too, so there it is parted
+   * from the page by its hairline `border` instead of by a different fill).
+   * In the light theme it is the clear-sky blue, with a deep blue-black text,
+   * so the page's own links and the header's are one blue family. `hover` is
+   * the quiet buttons' hover fill and `focus` the keyboard ring; both are
+   * scoped to the header (site-header.module.css). The `themeColor` in
+   * layout.tsx mirrors `bg`.
    */
-  --color-header-bg: light-dark(#0b1721, #000000);
-  --color-header-text: light-dark(#e9f2f7, #f5f5f7);
-  --color-header-border: light-dark(#34505f, #38383a);
-  --color-header-hover: light-dark(#1b3341, #2c2c2e);
-  --color-header-focus: light-dark(#7cc4f0, #409cff);
+  --color-header-bg: light-dark(#7ab8f5, #000000);
+  --color-header-text: light-dark(#0a2a43, #f5f5f7);
+  --color-header-border: light-dark(#5a96d6, #38383a);
+  --color-header-hover: light-dark(#a2cdf8, #2c2c2e);
+  --color-header-focus: light-dark(#0a2a43, #409cff);
 
   /*
    * The traffic lights (vision, Core flow 3). Per light: `bg` is a cell's fill,
@@ -278,11 +294,12 @@ ol {
 }
 
 /*
- * It pops up over the top of the page, which is the dark header once logged
- * in; the page's own focus colour in the light theme is a deep blue that
- * would nearly vanish on it, so it uses the header's ring. The halo in the
- * header's own colour (as wide as the ring plus its 2px offset) keeps that
- * ring visible on the pale page of the logged-out screens too.
+ * It pops up over the top of the page, which is the header once logged in
+ * (light blue, or black in the dark theme), so it uses the header's ring: a
+ * deep navy in light, the blue in dark. The halo in the header's own colour
+ * (as wide as the ring plus its 2px offset) keeps that ring and the button's
+ * edge clear over the header and over the white or black page of the logged-out
+ * screens alike.
  */
 .skip-link:focus-visible {
   transform: none;

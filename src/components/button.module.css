@@ -27,9 +27,14 @@
   background: color-mix(in srgb, var(--color-button-bg) 85%, var(--color-text));
 }
 
-/* Any other action: an outline in the link colour. */
+/*
+ * Any other action: an outline. One colour family for every button (Ben:
+ * "make the button colours the same colour"): in the light theme the outline
+ * and its words are the same blue as the filled button, so they differ only in
+ * fill; in the dark theme the edge stays the neutral grey (--color-button-border).
+ */
 .secondary {
-  border-color: var(--color-border-strong);
+  border-color: var(--color-button-border);
   background: var(--color-surface);
   color: var(--color-link);
 }
@@ -40,8 +45,8 @@
 
 /*
  * The header's site-name and Account links: present on every screen, so they
- * stay calm. These colours suit a light page; the header re-colours them for
- * its dark band (site-header.module.css).
+ * stay calm. These colours suit a plain page; the header re-colours them for
+ * its own band (site-header.module.css), in the header's blue family.
  */
 .quiet {
   background: transparent;

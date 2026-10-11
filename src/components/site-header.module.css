@@ -1,6 +1,6 @@
 /*
- * Always dark (vision, Theme > Team conventions 10): the deep blue-black band in
- * the light theme, black with a hairline under it in the dark theme.
+ * Light blue in the light theme (Ben, 11 Oct 2026), black with a hairline under
+ * it in the dark theme (vision, Theme > Team conventions 10).
  */
 .header {
   border-bottom: 1px solid var(--color-header-border);
@@ -19,10 +19,10 @@
 }
 
 /*
- * The quiet Button's colours (a blue link, a pale hover) are made for a themed
- * page, so on the dark band they are re-coloured here, only for the header's
- * links, rather than changing the shared Button. `.nav a` is more specific
- * than the button's own classes, so these win without !important.
+ * The quiet Button's colours (a blue link, a pale hover) are made for a plain
+ * page, so in the header's band they are re-coloured here, only for the
+ * header's links, rather than changing the shared Button. `.nav a` is more
+ * specific than the button's own classes, so these win without !important.
  * nowrap: "LX Tennis Weather" must stay on one line beside Account at 360px.
  */
 .nav a {
