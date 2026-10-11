@@ -30,6 +30,6 @@
   stroke: var(--color-mark-bg);
 }
 
-.cloud {
-  fill: var(--color-mark-cloud);
+.rays {
+  stroke: var(--color-mark-rays);
 }

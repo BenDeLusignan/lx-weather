@@ -1,20 +1,10 @@
 import type { Metadata, Viewport } from "next";
-import { Orbitron } from "next/font/google";
 import { Suspense } from "react";
 import { AccountTheme } from "@/components/account-theme";
 import { SiteHeader } from "@/components/site-header";
 import { THEME_BOOT_SCRIPT } from "@/preferences/theme";
 import "./globals.css";
 import styles from "./layout.module.css";
-
-// The wordmark's display face, the same one LX Tennis uses for its brand
-// (vision, Theme). Self-hosted by next/font, so no request goes to Google when
-// someone visits. It is only used by the header, so the logged-out pages never
-// show it; `--font-display` in globals.css names it with a system fallback.
-const orbitron = Orbitron({
-  variable: "--font-orbitron",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   title: {
@@ -46,7 +36,7 @@ export const viewport: Viewport = {
 // suppressHydrationWarning: the script changes <html> before React hydrates.
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en-GB" className={orbitron.variable} suppressHydrationWarning>
+    <html lang="en-GB" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_BOOT_SCRIPT }} />
       </head>

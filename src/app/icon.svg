@@ -1,18 +1,20 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
   <!-- Static asset: the colours are the tokens color-mark-bg-top (#2e93fd),
-       color-mark-bg (#1c73dc), color-mark-ball (#d9ec3f) and color-mark-cloud
+       color-mark-bg (#1c73dc), color-mark-ball (#d9ec3f) and color-mark-rays
        (#ffffff) from src/app/globals.css, written as hex because an SVG file
        can't read CSS variables. components/brand-mark.tsx draws the same
        picture with the tokens; change both together, and re-render
-       apple-icon.png. The picture is a cloud raining three tennis balls down a
-       diagonal, growing as they fall. The balls sit clear of the cloud and of
-       each other: white on lime has almost no contrast, so an overlap would
-       blur the cloud's edge at 16px. The tile is Apple Weather's own sky
-       gradient, sampled from its icon, settling to the deeper blue by 55
-       percent of the way down so the lime balls on it clear 3 to 1. Never
-       write a double hyphen inside a comment here, not even in a token name:
-       XML forbids it and the browser then drops the whole icon without any
-       error. -->
+       apple-icon.png. The picture is a tennis ball acting as the sun: a lime
+       ball with its two curved seams in the middle of the tile, ringed by
+       eight short white rays. The ball is kept to a radius of 11 so that its
+       topmost edge, where the tile is still easing from the lighter blue, is
+       still 3 to 1 against it; the rays are chunky round strokes so they
+       survive at 16px. The ball and the rays never touch (white on lime has
+       almost no contrast). The tile is Apple Weather's own sky gradient,
+       sampled from its icon, settling to the deeper blue by 55 percent of the
+       way down. Never write a double hyphen inside a comment here, not even in
+       a token name: XML forbids it and the browser then drops the whole icon
+       without any error. -->
   <defs>
     <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0" stop-color="#2e93fd"/>
@@ -20,21 +22,9 @@
     </linearGradient>
   </defs>
   <rect width="64" height="64" rx="14" fill="url(#sky)"/>
-  <g transform="translate(23 36) scale(0.462)">
-    <circle r="13" fill="#d9ec3f"/>
-    <path d="M-8.8-8.5c4.5 3.5 4.5 13 0 17M8.8-8.5c-4.5 3.5-4.5 13 0 17" fill="none" stroke="#1c73dc" stroke-width="2.5" stroke-linecap="round"/>
-  </g>
-  <g transform="translate(35 45) scale(0.5)">
-    <circle r="13" fill="#d9ec3f"/>
-    <path d="M-8.8-8.5c4.5 3.5 4.5 13 0 17M8.8-8.5c-4.5 3.5-4.5 13 0 17" fill="none" stroke="#1c73dc" stroke-width="2.5" stroke-linecap="round"/>
-  </g>
-  <g transform="translate(47.5 54.5) scale(0.577)">
-    <circle r="13" fill="#d9ec3f"/>
-    <path d="M-8.8-8.5c4.5 3.5 4.5 13 0 17M8.8-8.5c-4.5 3.5-4.5 13 0 17" fill="none" stroke="#1c73dc" stroke-width="2.5" stroke-linecap="round"/>
-  </g>
-  <g fill="#ffffff">
-    <rect x="8" y="14" width="44" height="13" rx="6.5"/>
-    <circle cx="22" cy="15" r="8.5"/>
-    <circle cx="36" cy="13.5" r="10.5"/>
+  <path d="M32 15L32 9.5M44.02 19.98L47.91 16.09M49 32L54.5 32M44.02 44.02L47.91 47.91M32 49L32 54.5M19.98 44.02L16.09 47.91M15 32L9.5 32M19.98 19.98L16.09 16.09" fill="none" stroke="#ffffff" stroke-width="6.5" stroke-linecap="round"/>
+  <g transform="translate(32 32)">
+    <circle r="11" fill="#d9ec3f"/>
+    <path d="M-7.5-7.2c3.8 3 3.8 11 0 14.4M7.5-7.2c-3.8 3-3.8 11 0 14.4" fill="none" stroke="#1c73dc" stroke-width="2.2" stroke-linecap="round"/>
   </g>
 </svg>

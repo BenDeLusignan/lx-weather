@@ -26,9 +26,10 @@ export async function SiteHeader() {
         <Button href="/" variant="quiet">
           <BrandMark />
           {/*
-            The words stay real text. Upper case, the slant and the stacking on
-            a phone are all CSS (site-header.module.css), and the spaces between
-            the spans keep the accessible name "LX Tennis Weather".
+            The words stay real text. The weights and sizes are CSS
+            (site-header.module.css, which also says why the wordmark must not
+            change on hover), and the space between the spans keeps the
+            accessible name "LX Tennis Weather".
           */}
           <span className={styles.wordmark}>
             <span className={styles.lx}>LX</span> <span className={styles.name}>Tennis Weather</span>
