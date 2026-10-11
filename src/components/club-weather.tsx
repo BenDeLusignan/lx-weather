@@ -9,8 +9,8 @@ import styles from "./club-weather.module.css";
 /**
  * The week screen for one club: the home screen (`/`) and an Away Game
  * (`/away/[clubId]`) are this same component with a different club (vision,
- * Core flow 4). Club name as the h1, the Open-Meteo credit (CC BY 4.0, Team
- * convention 2), then the week.
+ * Core flow 4). Club name as the h1, the Open-Meteo and UK Met Office credit
+ * (CC BY 4.0 and CC BY-SA 4.0, Team convention 2), then the week.
  *
  * The club and the heading render at once; the forecast streams in behind
  * <Suspense>, because it may have to be fetched.
@@ -45,7 +45,10 @@ export function ClubWeather({ club, home }: { club: Club; home: boolean }) {
         */}
       <p className={styles.credit}>
         Weather data by <a href="https://open-meteo.com">Open-Meteo.com</a> (
-        <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>)
+        <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>
+        ), including UK Met Office model data (
+        <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>
+        ).
       </p>
 
       <Suspense fallback={<WeekLoading />}>

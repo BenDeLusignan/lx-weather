@@ -9,7 +9,7 @@ A weather app for tennis players in Northern Ireland. It combines the forecasts 
 - [Next.js](https://nextjs.org) 16 (App Router, Cache Components) + TypeScript, React 19
 - Plain CSS / CSS Modules, no Tailwind. Every colour is a semantic token in `src/app/globals.css`, with a light and a dark value (the look is [in the vision](docs/vision.md), "Theme")
 - SQLite through [Drizzle ORM](https://orm.drizzle.team) and `@libsql/client`: a local file in development, [Turso](https://turso.tech) later by changing `DATABASE_URL`
-- Forecasts from [Open-Meteo](https://open-meteo.com) (five models, no key), cached on the server for up to an hour per club
+- Forecasts from [Open-Meteo](https://open-meteo.com) (five models, no key, free non-commercial tier), cached on the server for up to an hour per club. The site credits Open-Meteo (CC BY 4.0) and the UK Met Office model data (CC BY-SA 4.0); see the vision for the open licence question
 
 ## Setup
 
