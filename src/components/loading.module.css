@@ -1,0 +1,68 @@
+/* Grey placeholder shapes. They stand where the content will be, so the page doesn't jump when it arrives. */
+.bar,
+.cell {
+  border-radius: var(--radius-sm);
+  background: var(--color-border);
+  opacity: 0.6;
+  animation: pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  50% {
+    opacity: 0.3;
+  }
+}
+
+.page {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.title {
+  width: 60%;
+  max-width: 16rem;
+  height: 2rem;
+}
+
+.line {
+  width: 100%;
+  max-width: 24rem;
+  height: 1rem;
+}
+
+.week {
+  display: grid;
+  gap: var(--space-6);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.day {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.dayTitle {
+  width: 14rem;
+  max-width: 70%;
+  height: 1.25rem;
+}
+
+/* The same columns as the real strip (day-strip.module.css): 6, then 12 from 48rem. */
+.cells {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: var(--space-1);
+}
+
+.cell {
+  height: 5.5rem;
+}
+
+@media (min-width: 48rem) {
+  .cells {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: var(--space-2);
+  }
+}

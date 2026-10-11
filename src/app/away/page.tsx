@@ -5,20 +5,19 @@ import { Suspense } from "react";
 import { getCurrentUser } from "@/auth/current-user";
 import { homeClubOrChoose } from "@/auth/home-club";
 import { awayClubs } from "@/clubs/lookup";
-import { Main } from "@/components/main";
+import { PageLoading } from "@/components/loading";
 import styles from "./page.module.css";
 
 export const metadata: Metadata = {
   title: "Away Game",
+  description: "Choose another club to see its week of playing conditions.",
 };
 
 export default function AwayPage() {
   return (
-    <Main>
-      <Suspense fallback={<p role="status">Loading…</p>}>
-        <AwayList />
-      </Suspense>
-    </Main>
+    <Suspense fallback={<PageLoading />}>
+      <AwayList />
+    </Suspense>
   );
 }
 
@@ -30,8 +29,8 @@ async function AwayList() {
 
   return (
     <>
-      <h1>Away Game</h1>
-      <p>Choose a club to see its week.</p>
+      <h1 className={styles.title}>Away Game</h1>
+      <p className={styles.intro}>Choose a club to see its week.</p>
       <ul className={styles.list}>
         {awayClubs(home.id).map((club) => (
           <li key={club.id}>

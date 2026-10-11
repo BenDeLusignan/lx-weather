@@ -1,0 +1,18 @@
+.notice {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-left-width: 0.375rem;
+  border-radius: var(--radius);
+  background: var(--color-surface);
+}
+
+/* Something is missing but the screen still works: the words say what. */
+.warning {
+  border-left-color: var(--light-passable-strong);
+}
+
+/* Nothing can be shown. */
+.problem {
+  border-left-color: var(--light-unlikely-strong);
+}

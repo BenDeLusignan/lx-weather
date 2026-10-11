@@ -1,9 +1,0 @@
-.form {
-  display: grid;
-  gap: var(--space-4);
-  max-width: 24rem;
-}
-
-.alt {
-  margin-top: var(--space-6);
-}

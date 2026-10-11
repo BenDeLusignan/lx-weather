@@ -1,13 +1,53 @@
+.intro {
+  margin: 0 0 var(--space-4);
+  color: var(--color-text-muted);
+}
+
+.title {
+  margin: 0 0 var(--space-2);
+  font-size: var(--font-size-xl);
+}
+
+/*
+ * One tile per club, in the order the page gives them (alphabetical, Core flow
+ * 4). CSS columns, not a grid, so the order reads down each column and then on
+ * to the next: one column on a phone, up to three on a wide screen, with no
+ * breakpoint (14rem is the narrowest a column gets).
+ */
 .list {
-  display: grid;
+  columns: 14rem 3;
+  column-gap: var(--space-3);
   margin: 0;
-  padding: 0;
   list-style: none;
+}
+
+.list li {
+  break-inside: avoid;
+  margin-bottom: var(--space-2);
 }
 
 .link {
   display: flex;
   align-items: center;
-  min-height: var(--touch-target);
-  border-bottom: 1px solid var(--color-border);
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-height: 3.25rem;
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.link::after {
+  content: "›";
+  color: var(--color-text-muted);
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.link:hover {
+  background: var(--color-surface-sunken);
 }

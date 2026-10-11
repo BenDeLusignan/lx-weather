@@ -1,0 +1,43 @@
+.table {
+  width: 100%;
+  max-width: 40rem;
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+.table th,
+.table td {
+  padding: var(--space-2) var(--space-2) var(--space-2) 0;
+  border-top: 1px solid var(--color-border);
+  text-align: left;
+  vertical-align: top;
+  font-weight: 400;
+}
+
+.table thead th {
+  border-top: 0;
+  color: var(--color-text-muted);
+  font-weight: 600;
+}
+
+/* The figures never break ("15.8 °C", "12 mph"); the provider's name is what wraps, so a phone-width table stays three short columns. */
+.table td {
+  white-space: nowrap;
+}
+
+/* The provider's name is the row's heading, so it is the strong one. */
+.table tbody th {
+  font-weight: 600;
+}
+
+/* Both wind units, one under the other, so a phone-width table doesn't have to break "mph / km/h" mid-way. */
+.unit {
+  display: block;
+}
+
+/* A provider with nothing for this hour says so, in words and in a quieter style. */
+.noData {
+  color: var(--color-text-muted);
+  font-style: italic;
+}

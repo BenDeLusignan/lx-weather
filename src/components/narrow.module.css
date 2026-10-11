@@ -1,0 +1,8 @@
+.narrow {
+  max-width: var(--narrow-width);
+}
+
+/* On the login and sign-up pages the narrow column sits in the middle of a wide screen. */
+.centred {
+  margin-inline: auto;
+}

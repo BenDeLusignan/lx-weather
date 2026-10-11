@@ -5,17 +5,19 @@ import { Suspense } from "react";
 import { signUp } from "@/auth/actions";
 import { getCurrentUser } from "@/auth/current-user";
 import type { SignUpError } from "@/auth/submit";
+import { AuthCard } from "@/components/auth-card";
 import { SubmitButton } from "@/components/button";
 import { ClubSelect } from "@/components/club-select";
-import { Field, controlClassName } from "@/components/field";
+import { Field, controlClassName, describedBy, hintId } from "@/components/field";
+import { Form } from "@/components/form";
 import { FormMessage } from "@/components/form-message";
-import { Main } from "@/components/main";
+import { PageLoading } from "@/components/loading";
 import { EMAIL_MAX_LENGTH, PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH } from "@/data/limits";
 import { lockoutMessage } from "@/forms/lockout-message";
-import styles from "./page.module.css";
 
 export const metadata: Metadata = {
   title: "Sign up",
+  description: "Create an account and choose your home tennis club.",
 };
 
 // The codes the signUp action redirects with, each with its own message.
@@ -30,13 +32,13 @@ const ERRORS: Record<SignUpError, string> = {
     "We couldn’t create an account with those details. If you already have one, log in instead.",
 };
 
+const ERROR_ID = "signup-error";
+
 export default function SignUpPage({ searchParams }: PageProps<"/signup">) {
   return (
-    <Main>
-      <Suspense fallback={<p role="status">Loading…</p>}>
-        <SignUp searchParams={searchParams} />
-      </Suspense>
-    </Main>
+    <Suspense fallback={<PageLoading />}>
+      <SignUp searchParams={searchParams} />
+    </Suspense>
   );
 }
 
@@ -46,22 +48,21 @@ async function SignUp({ searchParams }: Pick<PageProps<"/signup">, "searchParams
   if (await getCurrentUser()) redirect("/");
 
   const { error, locked } = await searchParams;
-  const message =
-    locked !== undefined
-      ? lockoutMessage(locked)
-      : typeof error === "string" && error in ERRORS
-        ? ERRORS[error as SignUpError]
-        : null;
+  const code = typeof error === "string" && error in ERRORS ? (error as SignUpError) : null;
+  const message = locked !== undefined ? lockoutMessage(locked) : code ? ERRORS[code] : null;
 
   return (
-    <>
-      <h1>Sign up</h1>
+    <AuthCard title="Sign up">
       <p>Pick the club you play at. It’s your home club: its week is the first thing you see.</p>
-      <form action={signUp} className={styles.form}>
-        {message ? <FormMessage tone="error">{message}</FormMessage> : null}
-        <Field id="email" label="Email">
+      <Form action={signUp}>
+        {message ? (
+          <FormMessage tone="error" id={ERROR_ID}>
+            {message}
+          </FormMessage>
+        ) : null}
+        <Field id="signup-email" label="Email">
           <input
-            id="email"
+            id="signup-email"
             name="email"
             type="email"
             required
@@ -70,32 +71,43 @@ async function SignUp({ searchParams }: Pick<PageProps<"/signup">, "searchParams
             autoCapitalize="none"
             autoCorrect="off"
             spellCheck={false}
+            aria-invalid={code === "email" || undefined}
+            aria-describedby={describedBy(code === "email" && ERROR_ID)}
             className={controlClassName}
           />
         </Field>
-        <Field id="password" label="Password" hint={`At least ${PASSWORD_MIN_LENGTH} characters.`}>
+        <Field
+          id="signup-password"
+          label="Password"
+          hint={`At least ${PASSWORD_MIN_LENGTH} characters.`}
+        >
           <input
-            id="password"
+            id="signup-password"
             name="password"
             type="password"
             required
             minLength={PASSWORD_MIN_LENGTH}
             maxLength={PASSWORD_MAX_LENGTH}
             autoComplete="new-password"
-            aria-describedby="password-hint"
+            aria-invalid={code === "password" || undefined}
+            aria-describedby={describedBy(hintId("signup-password"), code === "password" && ERROR_ID)}
             className={controlClassName}
           />
         </Field>
-        <Field id="homeClub" label="Home club">
-          <ClubSelect id="homeClub" />
+        <Field id="signup-club" label="Home club">
+          <ClubSelect
+            id="signup-club"
+            invalid={code === "club"}
+            describedBy={describedBy(code === "club" && ERROR_ID)}
+          />
         </Field>
         <div>
           <SubmitButton>Sign up</SubmitButton>
         </div>
-      </form>
-      <p className={styles.alt}>
+      </Form>
+      <p>
         Already have an account? <Link href="/">Log in</Link>
       </p>
-    </>
+    </AuthCard>
   );
 }

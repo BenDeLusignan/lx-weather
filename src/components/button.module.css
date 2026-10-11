@@ -2,14 +2,48 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: var(--space-2);
   min-height: var(--touch-target);
   padding: var(--space-2) var(--space-4);
-  border: 0;
+  border: 2px solid transparent;
   border-radius: var(--radius);
-  background: var(--color-button-bg);
-  color: var(--color-button-text);
   font: inherit;
   font-weight: 600;
+  line-height: 1.2;
+  text-align: center;
   text-decoration: none;
   cursor: pointer;
+  transition: background-color var(--duration-fast);
+}
+
+/* The one main action on a screen: filled. */
+.primary {
+  background: var(--color-button-bg);
+  color: var(--color-button-text);
+}
+
+.primary:hover {
+  /* A touch darker or lighter than the fill, whichever theme it's in. */
+  background: color-mix(in srgb, var(--color-button-bg) 85%, var(--color-text));
+}
+
+/* Any other action: an outline in the link colour. */
+.secondary {
+  border-color: var(--color-border-strong);
+  background: var(--color-surface);
+  color: var(--color-link);
+}
+
+.secondary:hover {
+  background: var(--color-surface-sunken);
+}
+
+/* The header's Home and Account: present on every screen, so they stay calm. */
+.quiet {
+  background: transparent;
+  color: var(--color-link);
+}
+
+.quiet:hover {
+  background: var(--color-surface-sunken);
 }

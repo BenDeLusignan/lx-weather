@@ -7,7 +7,7 @@ A weather app for tennis players in Northern Ireland. It combines the forecasts 
 ## Stack
 
 - [Next.js](https://nextjs.org) 16 (App Router, Cache Components) + TypeScript, React 19
-- Plain CSS / CSS Modules, no Tailwind. Every colour is a custom property in `src/app/globals.css`
+- Plain CSS / CSS Modules, no Tailwind. Every colour is a semantic token in `src/app/globals.css`, with a light and a dark value (the look is [in the vision](docs/vision.md), "Theme")
 - SQLite through [Drizzle ORM](https://orm.drizzle.team) and `@libsql/client`: a local file in development, [Turso](https://turso.tech) later by changing `DATABASE_URL`
 - Forecasts from [Open-Meteo](https://open-meteo.com) (five models, no key), cached on the server for up to an hour per club
 
@@ -60,7 +60,7 @@ npm run forecast -- <latitude> <longitude>   # live week for any point
 
 | Route | What |
 | --- | --- |
-| `/` | Logged out: log in. Logged in: your home club's week |
+| `/` | Logged out: log in. Logged in: your home club's week (a strip of hour cells per day; tap an hour for its figures) |
 | `/signup` | Email, password (12+ characters), home club |
 | `/away` | The other clubs, alphabetical |
 | `/away/[clubId]` | The same week screen for that club |
@@ -68,6 +68,8 @@ npm run forecast -- <latitude> <longitude>   # live week for any point
 
 ## Gotchas
 
+- **Colours go in tokens.** Never write a hex value in a component or a CSS Module: add a token to `src/app/globals.css` (both its light and its dark value, and its contrast ratio in the header comment). The exceptions that mirror tokens are in the vision, "Theme", Team conventions.
+- **Check the week at 360px and 768px after touching the hour cells.** "Passable" has to fit the narrowest cell; the vision's "Theme" says why and where.
 - **`PageProps` / `LayoutProps` are generated types.** Next creates them in `.next/` (gitignored), so on a fresh clone your editor and `tsc` will report them as missing until you run `npm run dev`, `npm run build` or `npx next typegen` once.
 - **`npm test` runs `tsx --conditions=react-server`.** Server-side modules import `server-only`, which throws when loaded outside the React server environment; that flag tells Node to load the server build of it. Don't remove it from `package.json`, or the tests will fail on import.
 - **`next dev` rewrites part of `AGENTS.md`.** When it detects an AI coding agent and the Next.js block is missing or out of date, it rewrites everything between the `<!-- BEGIN:nextjs-agent-rules -->` and `<!-- END:nextjs-agent-rules -->` markers. Don't edit inside those markers; put project notes outside them.

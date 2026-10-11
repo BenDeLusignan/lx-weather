@@ -7,11 +7,29 @@ import { controlClassName } from "@/components/field";
  * that isn't in the list (a club since removed) selects nothing, so the
  * user has to choose again rather than being quietly given a club.
  */
-export function ClubSelect({ id, selectedId }: { id: string; selectedId?: string }) {
+export function ClubSelect({
+  id,
+  selectedId,
+  invalid,
+  describedBy,
+}: {
+  id: string;
+  selectedId?: string;
+  invalid?: boolean;
+  describedBy?: string;
+}) {
   const clubs = clubsByName();
   const selected = clubs.find((club) => club.id === selectedId)?.id ?? "";
   return (
-    <select id={id} name="homeClub" required defaultValue={selected} className={controlClassName}>
+    <select
+      id={id}
+      name="homeClub"
+      required
+      defaultValue={selected}
+      aria-invalid={invalid || undefined}
+      aria-describedby={describedBy}
+      className={controlClassName}
+    >
       <option value="" disabled>
         Choose your club
       </option>

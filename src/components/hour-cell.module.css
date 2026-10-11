@@ -1,0 +1,145 @@
+/*
+ * One hour of one day: a small cell in the day's strip that opens a card with
+ * the figures. The cell is a <summary>, so it works before JavaScript and
+ * keyboards and screen readers get a button that says whether it is open.
+ */
+.item {
+  /* Placed by hour so every day lines up (set from gridColumns in format.ts). */
+  grid-column: var(--col-phone);
+  min-width: 0;
+}
+
+.details {
+  height: 100%;
+}
+
+.cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.125rem;
+  height: 100%;
+  min-height: 5rem;
+  padding: var(--space-1) 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  /*
+   * 11px on a 360px phone, 12px from 390px: "Passable" is the widest word and
+   * a cell is about 51px wide at 360px (12px gutters, 4px gaps) and the word is 50px. Check it at 360 if you change the font, the
+   * padding or the strip's gap.
+   */
+  font-size: clamp(0.6875rem, 3.333vw - 0.0625rem, 0.75rem);
+  line-height: 1.2;
+  text-align: center;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+  /* The cell's own words never wrap and never get cut: "Passable" is the longest. */
+  overflow-wrap: normal;
+}
+
+.cell::-webkit-details-marker {
+  display: none;
+}
+
+.good {
+  background: var(--light-good-bg);
+  color: var(--light-good-fg);
+}
+
+.passable {
+  background: var(--light-passable-bg);
+  color: var(--light-passable-fg);
+}
+
+.unlikely {
+  background: var(--light-unlikely-bg);
+  color: var(--light-unlikely-fg);
+}
+
+.unknown {
+  background: var(--light-unknown-bg);
+  color: var(--light-unknown-fg);
+  border-style: dashed;
+}
+
+.cell:hover {
+  filter: brightness(0.96);
+}
+
+/*
+ * The open cell: a thick ring in the text colour, so you can see which hour the
+ * card below is about. Outside the cell (in the gap), so it never covers the
+ * text; the focus ring is an outline, so both show at once.
+ */
+.details[open] > .cell {
+  /* Lifted so the neighbours' backgrounds, which come later, don't paint over the ring. */
+  position: relative;
+  z-index: 1;
+  box-shadow: 0 0 0 3px var(--color-text);
+}
+
+.hour {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.word {
+  font-weight: 700;
+  /* Tightened a touch so "Passable" clears the cell's edges at 360px and 768px (the narrowest cells). */
+  letter-spacing: -0.02em;
+}
+
+.rain {
+  font-variant-numeric: tabular-nums;
+}
+
+/* "4 of 5": the rain figure is built from fewer than five providers (Team convention 1). */
+.count {
+  font-size: 0.6875rem;
+}
+
+/*
+ * The card. It's out of the flow, anchored to the bottom of the day, so
+ * opening an hour never moves the cells: the week stays where you left it.
+ * The day section is the positioned ancestor (day-strip.module.css), so the
+ * strip and its list must not become positioned themselves.
+ */
+.card {
+  position: absolute;
+  z-index: 5;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: var(--space-2);
+  padding: var(--space-4);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-raised);
+}
+
+/* Breakpoint 48rem: see vision.md "Theme". The strip is one row of twelve now. */
+@media (min-width: 48rem) {
+  .item {
+    grid-column: var(--col-wide);
+  }
+
+  .cell {
+    /*
+     * A cell is (100vw - 136px) / 12 wide here and "Passable" is 4.55 times the
+     * font size, so the size grows with the screen: 11px at 768px, the full
+     * 14px from about 1000px. Re-check at 768 if you change the gap or the gutters.
+     */
+    font-size: clamp(0.6875rem, 1.724vw - 0.162rem, var(--font-size-sm));
+    min-height: 5.5rem;
+  }
+
+  .count {
+    font-size: var(--font-size-xs);
+  }
+
+  .card {
+    padding: var(--space-4) var(--space-6);
+  }
+}

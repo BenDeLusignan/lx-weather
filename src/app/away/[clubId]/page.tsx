@@ -6,7 +6,7 @@ import { homeClubOrChoose } from "@/auth/home-club";
 import { CLUBS } from "@/clubs/clubs";
 import { findClub } from "@/clubs/lookup";
 import { ClubWeather } from "@/components/club-weather";
-import { Main } from "@/components/main";
+import { PageLoading } from "@/components/loading";
 
 // Every club is a known path. Cache Components doesn't allow
 // `dynamicParams = false`, so an unknown id renders on request and gets its
@@ -23,7 +23,9 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: PageProps<"/away/[clubId]">): Promise<Metadata> {
   const club = findClub((await params).clubId);
-  return club ? { title: club.name } : {};
+  return club
+    ? { title: `${club.name} (away)`, description: `Hour-by-hour playing conditions at ${club.name} for the next week.` }
+    : {};
 }
 
 export default async function AwayClubPage({ params }: PageProps<"/away/[clubId]">) {
@@ -31,11 +33,9 @@ export default async function AwayClubPage({ params }: PageProps<"/away/[clubId]
   if (!club) notFound();
 
   return (
-    <Main>
-      <Suspense fallback={<p role="status">Loading…</p>}>
-        <AwayClub clubId={club.id} />
-      </Suspense>
-    </Main>
+    <Suspense fallback={<PageLoading />}>
+      <AwayClub clubId={club.id} />
+    </Suspense>
   );
 }
 
@@ -48,5 +48,5 @@ async function AwayClub({ clubId }: { clubId: string }) {
 
   const club = findClub(clubId);
   if (!club) notFound();
-  return <ClubWeather club={club} />;
+  return <ClubWeather club={club} home={false} />;
 }

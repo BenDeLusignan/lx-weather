@@ -1,0 +1,20 @@
+/*
+ * The page's one <main>. Every page renders inside it, so there is exactly one
+ * <main id="main"> however many routes Next keeps in the DOM while navigating,
+ * and the skip link always lands on the right one.
+ */
+.main {
+  flex: 1;
+  width: 100%;
+  max-width: var(--content-width);
+  margin-inline: auto;
+  /* 12px gutters on a phone: the hour cells need every pixel (see hour-cell.module.css). */
+  padding: var(--space-4) var(--space-3) var(--space-12);
+}
+
+/* Breakpoint 48rem: see vision.md "Theme". */
+@media (min-width: 48rem) {
+  .main {
+    padding: var(--space-6) var(--space-6) var(--space-12);
+  }
+}

@@ -1,0 +1,72 @@
+.detail {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.title {
+  margin: 0;
+  font-size: var(--font-size-lg);
+}
+
+.verdict {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+}
+
+.verdictWord {
+  font-weight: 700;
+}
+
+.figures {
+  display: grid;
+  gap: var(--space-2) var(--space-6);
+  margin: 0;
+}
+
+.figure {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-1) var(--space-3);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.figure dt {
+  color: var(--color-text-muted);
+}
+
+.figure dd {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-1) var(--space-2);
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.value {
+  font-weight: 600;
+}
+
+.note {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.why {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+/* Breakpoint 48rem: see vision.md "Theme". The three figures sit side by side once there is room. */
+@media (min-width: 48rem) {
+  .figures {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}

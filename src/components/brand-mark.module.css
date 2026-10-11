@@ -1,0 +1,30 @@
+.mark {
+  display: block;
+  flex: none;
+}
+
+.md {
+  width: 1.75rem;
+  height: 1.75rem;
+}
+
+.lg {
+  width: 4rem;
+  height: 4rem;
+}
+
+.bg {
+  fill: var(--color-mark-bg);
+}
+
+.ball {
+  fill: var(--color-mark-ball);
+}
+
+.seams {
+  stroke: var(--color-mark-bg);
+}
+
+.cloud {
+  fill: var(--color-mark-cloud);
+}

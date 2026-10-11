@@ -1,15 +1,22 @@
 .message {
   margin: 0;
-  padding: var(--space-3);
-  border-left: 4px solid currentColor;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-left-width: 0.375rem;
+  border-radius: var(--radius);
   background: var(--color-surface);
   font-weight: 600;
 }
 
+/* The colour only tints the edge; the words say "nothing was saved" or "saved". */
 .error {
-  color: var(--color-error);
+  border-left-color: var(--color-error);
 }
 
 .success {
-  color: var(--color-success);
+  border-left-color: var(--color-success);
+}
+
+.message:focus-visible {
+  outline-offset: 2px;
 }

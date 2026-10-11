@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { Main } from "@/components/main";
+import { Button } from "@/components/button";
+import { Narrow } from "@/components/narrow";
+import styles from "./not-found.module.css";
 
 export const metadata: Metadata = {
   title: "Page not found",
@@ -8,12 +9,14 @@ export const metadata: Metadata = {
 
 export default function NotFound() {
   return (
-    <Main>
-      <h1>Page not found</h1>
-      <p>That page doesn’t exist.</p>
-      <p>
-        <Link href="/">Back to the home screen</Link>
-      </p>
-    </Main>
+    <Narrow>
+      <div className={styles.page}>
+        <h1 className={styles.title}>Page not found</h1>
+        <p>That page doesn’t exist. It may have moved, or the link may be wrong.</p>
+        <div>
+          <Button href="/">Back to the home screen</Button>
+        </div>
+      </div>
+    </Narrow>
   );
 }

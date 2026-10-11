@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Static asset: the colours are the tokens color-mark-bg (#0a5a8c),
+       color-mark-ball (#d9ec3f) and color-mark-cloud (#ffffff) from
+       src/app/globals.css, written as hex because an SVG file can't read CSS
+       variables. components/brand-mark.tsx draws the same picture with the
+       tokens; change both together. Never write a double hyphen inside a
+       comment here, not even in a token name: XML forbids it and the browser
+       then drops the whole icon without any error. -->
+  <rect width="64" height="64" rx="14" fill="#0a5a8c"/>
+  <circle cx="40" cy="25" r="14" fill="#d9ec3f"/>
+  <path d="M30.5 15.5c5 4 5 15 0 19M49.5 15.5c-5 4-5 15 0 19" fill="none" stroke="#0a5a8c" stroke-width="2.5" stroke-linecap="round"/>
+  <g fill="#ffffff">
+    <rect x="12" y="43" width="42" height="12" rx="6"/>
+    <circle cx="25" cy="43" r="8.5"/>
+    <circle cx="38" cy="39" r="11"/>
+  </g>
+</svg>
