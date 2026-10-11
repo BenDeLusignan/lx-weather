@@ -1,4 +1,7 @@
-/* A deep purple band in both themes (vision, Theme > Team conventions 10). */
+/*
+ * Always dark (vision, Theme > Team conventions 10): the deep blue-black band in
+ * the light theme, black with a hairline under it in the dark theme.
+ */
 .header {
   border-bottom: 1px solid var(--color-header-border);
   background: var(--color-header-bg);
@@ -16,7 +19,7 @@
 }
 
 /*
- * The quiet Button's colours (a purple link, a pale hover) are made for a themed
+ * The quiet Button's colours (a blue link, a pale hover) are made for a themed
  * page, so on the dark band they are re-coloured here, only for the header's
  * links, rather than changing the shared Button. `.nav a` is more specific
  * than the button's own classes, so these win without !important.

@@ -1,6 +1,14 @@
 .mark {
   display: block;
   flex: none;
+  /*
+   * The hairline ring is --color-mark-edge: none in the light theme, a lighter
+   * blue in the dark one, where the tile on a black page is a touch under 3:1
+   * (globals.css). The radius is the tile's rx of 14 in the 64 viewBox, so the
+   * ring follows the tile's corners.
+   */
+  border-radius: 21.875%;
+  box-shadow: 0 0 0 1px var(--color-mark-edge);
 }
 
 .md {

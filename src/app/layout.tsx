@@ -20,8 +20,8 @@ export const metadata: Metadata = {
 // the device, not the user's choice on the Account page.
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f5efff" },
-    { media: "(prefers-color-scheme: dark)", color: "#1f0b4d" },
+    { media: "(prefers-color-scheme: light)", color: "#eef4f8" },
+    { media: "(prefers-color-scheme: dark)", color: "#000000" },
   ],
 };
 

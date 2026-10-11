@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <!-- Static asset: the colours are the tokens color-mark-bg (#7c3aed),
+  <!-- Static asset: the colours are the tokens color-mark-bg (#0a5a8c),
        color-mark-ball (#d9ec3f) and color-mark-cloud (#ffffff) from
        src/app/globals.css, written as hex because an SVG file can't read CSS
        variables. components/brand-mark.tsx draws the same picture with the
@@ -8,9 +8,9 @@
        would blur the cloud's edge at 16px. Never write a double hyphen inside a
        comment here, not even in a token name: XML forbids it and the browser
        then drops the whole icon without any error. -->
-  <rect width="64" height="64" rx="14" fill="#7c3aed"/>
+  <rect width="64" height="64" rx="14" fill="#0a5a8c"/>
   <circle cx="32" cy="46" r="13" fill="#d9ec3f"/>
-  <path d="M23.2 37.5c4.5 3.5 4.5 13 0 17M40.8 37.5c-4.5 3.5-4.5 13 0 17" fill="none" stroke="#7c3aed" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M23.2 37.5c4.5 3.5 4.5 13 0 17M40.8 37.5c-4.5 3.5-4.5 13 0 17" fill="none" stroke="#0a5a8c" stroke-width="2.5" stroke-linecap="round"/>
   <g fill="#ffffff">
     <rect x="10" y="17" width="44" height="12" rx="6"/>
     <circle cx="24" cy="18" r="8"/>
