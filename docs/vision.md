@@ -30,23 +30,30 @@ A website / web app that works on **both the computer and the phone**.
 
 ## Core flow (Ben's decisions)
 
-1. **Open the app, log in.** It shows **the logged-in user's home club** for **one week** (Ben: "Let's just do one week then"; this replaces the first brief's current week and next week).
-2. **Every day shows its times from 08:00 to 20:00, and each block gets a traffic-light score** (Ben: "show the times for each day from 08:00 to 20:00 and have a score for each block"):
+1. **The landing page is the log in** (Ben: "Landing page is a log in"). Team's reading, not Ben's words: a new user reaches sign-up from it (Ben earlier: "Users will sign up and select their club from the list").
+2. **Once logged in, the home screen is the user's home club's weather, with the club name at the top**, for **one week** (Ben: "Let's just do one week then"; this replaces the first brief's current week and next week).
+3. **Every day shows its times from 08:00 to 20:00, and each block gets a traffic-light score** (Ben: "show the times for each day from 08:00 to 20:00 and have a score for each block"):
    - **Green:** a good chance of no rain or wind.
    - **Yellow:** passable level of play.
    - **Red:** very unlikely you will get to play.
 
    Team's readings, not Ben's words, so say if any is wrong: **one week is today and the next six days** (not Monday to Sunday); **a block is one hour** (08:00 to 09:00, then on to 19:00 to 20:00: twelve a day); **the score is the green/yellow/red light**; the blocks of today that are already over are not shown; all times are UK time (Europe/London).
-3. **An Away Game button.** The user picks any of the other clubs from the list and sees that club's one-week weather (the same view).
-4. **Aggregated figures, with the sources one tap away.** Temperature, wind, rain and the rest are shown as an **aggregate** of the five providers. An **expand source data** control shows what each of the five providers says specifically.
+4. **An Away Game button** on the home screen shows **a list of the other clubs, alphabetically**. Clicking one shows **the same screen as the home screen, with that club and its data** instead (Ben: "once they are clicked you see the same screen as your homescreen but with the selected club and its data instead").
+5. **There is always a Home button at the top of the screen, with an Account button** for changing the home club "if that ever happens" (Ben: "There should always be a home button at the top of the screen with an account button for changing your home club if that ever happens").
+6. **Aggregated figures, with the sources one tap away.** Temperature, wind, rain and the rest are shown as an **aggregate** of the five providers. An **expand source data** control shows what each of the five providers says specifically.
+7. **No day icon** (Ben: "No day icon as it could rain 80% of the day but not the 20% you actually want to play at"). Only the hour blocks are scored; nothing sums a day into one light.
+
+Team's readings of 4 and 5, not Ben's words: the list is sorted by the name shown, and "the other clubs" leaves out the user's own home club; Home and Account sit at the top of every screen once logged in; the Account page also has Log out, which a log-in needs.
 
 ## The clubs (Ben's decision)
 
-Eighteen clubs, in the order Ben listed them:
+Seventeen clubs (Ben listed eighteen names; the Belfast clubs are one entry, below), in the order Ben listed them:
 
 Enniskillen, Irvinestown, Omagh, Limavady, Coleraine, Dungannon, Ballymena, Portadown, Banbridge, Downshire (Hillsborough), Hilden (Lisburn), Larne, Whitehead, Belfast, Newcastle, Bangor, Donaghadee, Cloughey.
 
-This is the list of places "where we might be playing". Names are as Ben wrote them. **"Belfast" stands for about five clubs**, so the final list has one entry per club (Ben still has to say which; see Open questions).
+This is the list of places "where we might be playing". Names are as Ben wrote them.
+
+**Belfast is one entry** (Ben: "Belfast clubs are Windsor, Boat Club, Cavehill, Ballynafeigh, Hawarden, the others are indoor so it doesn't matter. If the weather data for these will be identical you can just put them all under one"). Windsor, Belfast Boat Club, Cavehill, Ballynafeigh and Hawarden share one forecast point, the middle of the five (54.58959, -5.91818; no club is more than 5.1 km from it). The team measured whether the five really are identical (11 Oct 2026, 82 blocks): not identical, but close. Against Windsor, another club's light differed in 3 to 5 blocks, by one step each; rain chance by up to 14 points, wind by up to 3 mph, temperature by under 1 degree. The cause is the models' coarse grid cells (10 to 28 km), so those are not real differences between the courts. Ben's condition ("if ... identical") isn't exactly met, so the team tells him; merging is what he allowed.
 
 **Addresses and locations** (Ben: "Use google maps and search for the names I gave you but add tennis club after each name") are in `src/clubs/clubs.ts`, found by searching Google Maps for each name plus "tennis club". Where the search didn't land on an obvious club, the team checked the club's own site or page:
 
@@ -59,7 +66,7 @@ This is the list of places "where we might be playing". Names are as Ben wrote t
 
 ### Ben's decisions
 
-1. **The headline is the aggregate; the providers are the detail.** The default view never makes the user read five forecasts. The five are available under "expand source data" (Core flow, 4).
+1. **The headline is the aggregate; the providers are the detail.** The default view never makes the user read five forecasts. The five are available under "expand source data" (Core flow, 6).
 2. **Never invent weather.** If a provider has no data or can't be reached, say so and show what the others say. No placeholder or sample numbers dressed up as a forecast. If nothing can be shown, show an honest empty state.
 3. **The traffic light follows the chance of rain and the wind.**
    - **Rain** (Ben: "Rain is what people are most worried about"):
@@ -95,6 +102,7 @@ This is the list of places "where we might be playing". Names are as Ben wrote t
    - **Consequence:** for a week starting 11 Oct every figure has four or five providers (16 Oct: DWD ICON's chance of rain has ended; 17 Oct: the Met Office model's other figures end at 13:00). Convention 1 shows the count on every figure, so it is never hidden. Outside the first week there are fewer, which is a reason to keep it to one week.
 3. **Rain chance is the mean of the providers that give one; temperature and wind are the median.** *Why:* each provider's chance is already a probability, so their mean is a probability too and every provider counts; the median keeps one model with a wild temperature or wind from dragging the figure. This is the team's reading of "most reliable", **not yet tested**: it should be checked against what actually happened (Open-Meteo's free Historical Forecast API holds past forecasts) before it is treated as settled.
 4. **Wind lights, by sustained wind speed** (Ben didn't give speeds; these are the team's pick, to be confirmed): **green under 10 mph, yellow 10 to 15 mph, red over 15 mph**, on the whole-number mph shown, like the rain light. *Why:* one tennis-conditions guide (Playable) says wind noticeably affects play from about 7 mph and is "genuinely unplayable for most recreational players above 15 mph sustained". Northern Ireland is windy, so the team put yellow at 10 rather than 7, so a normal breeze isn't a red day. The speed is the forecast's wind at 10 m up in the open, and courts are often sheltered; gusts, which the same guide says matter as much, are not used yet (see Open questions).
+5. **Forecasts are fetched on the server and cached** for up to an hour per forecast point, so the five providers aren't called on every page view and the site stays far under Open-Meteo's free limits (10,000 calls a day; 17 clubs at one call an hour is about 400). One hour is the team's pick; the models update a few times a day. Provider keys, if any are ever added, stay on the server.
 
 ## Current state
 
@@ -110,15 +118,13 @@ The forecast engine and the club list exist: TypeScript in `src/forecast/` and `
 ## Open questions (Ben hasn't answered; don't decide these)
 
 - **Confirm the wind speeds.** Ben can't remember what speed feels too much. The team's pick is yellow from 10 mph and red over 15 mph (Team convention 4); Ben says if that doesn't match how it feels on court.
-- **One icon for a day?** Ben's first brief gave each day an icon; the week view now shows a score per hour block. Whether each day also gets one icon, and how it is worked out from its blocks, is not decided.
-- **Sign-up details.** How a user signs up (email and password, as on LX Tennis, is the obvious choice but not decided), and whether they can change their home club afterwards.
-- **Which Belfast clubs.** About five. Google Maps' search for "Belfast tennis club" gave these seven, for Ben to pick from (address, then latitude and longitude): Windsor Tennis Club (37 Windsor Ave, BT9 6EJ; 54.5789615, -5.9428311), Belfast Boat Club (12 Lockview Rd, Stranmillis, BT9 5FJ; 54.5693257, -5.9272395), Cavehill Tennis Club (20 N Circular Rd, BT15 5HB; 54.6334037, -5.9423441), Ballynafeigh Tennis Club (35A Wynchurch Park, BT6 0JL; 54.5695406, -5.9018683), Indoor Tennis Arena and Ozone Complex (Ormeau Embankment, BT6 8LT; 54.5896789, -5.9151837), Hawarden Lawn Tennis Club (3 Clonlee Dr, BT4 3DA; 54.5967078, -5.876607), Forth River Bowling & Tennis Club (104a Woodvale Rd, BT13 3BU; 54.6101643, -5.9638982). The models are coarse (the ECMWF grid in this feed is 0.25 degrees, so a Belfast point was snapped to 54.5, -6.0), so the Belfast clubs will mostly show the same or a near-identical forecast.
+- **Sign-up details.** Ben hasn't said how sign-up should work. The team builds email address and password (as on LX Tennis) so there is something to log in with. The home club is picked at sign-up and changed on the Account page (Ben's decision, Core flow 5).
 - **What "the rest" means.** Ben listed temperature, wind and rain "etc". Other figures (humidity, gusts, sunrise and sunset, court-drying time) are not decided. Gusts matter for tennis, so they are the likeliest addition.
-- **The look.** LX Tennis's synthwave theme is Ben's decision for that site only; this site's look hasn't been chosen.
+- **The look.** LX Tennis's synthwave theme is Ben's decision for that site only. This site's first look is Drage's design for Ben to react to; it is not a decision.
 
 ## Proposals awaiting Ben (not decided)
 
-- **Forecasts fetched on the server and cached**, so the five providers aren't called on every page view and stay well under Open-Meteo's free limits.
+None at the moment.
 
 ## Priority and roadmap order (Ben's decision)
 

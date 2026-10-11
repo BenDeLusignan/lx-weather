@@ -8,9 +8,8 @@
  * needed rewording to find the right town, `locationNote` says what was done
  * and why.
  *
- * NOT here yet: Belfast. Ben says it is about five clubs and has not said
- * which; the candidates are in the vision's Open questions. Adding Belfast is
- * adding its clubs to this list, nothing else.
+ * Belfast is ONE entry for five clubs (Ben's decision, vision "The clubs"):
+ * its forecast point is the middle of the five clubs, listed in `includes`.
  */
 export interface Club {
   /** Stable key, used in URLs and in the database later. Never rename. */
@@ -24,6 +23,8 @@ export interface Club {
   longitude: number;
   /** Set only when the Google Maps result needed a check, a substitute or a reworded search. */
   locationNote?: string;
+  /** For a merged entry: the clubs it stands for. They share this entry's forecast point. */
+  includes?: readonly { name: string; address: string; latitude: number; longitude: number }[];
 }
 
 export const CLUBS: readonly Club[] = [
@@ -136,6 +137,23 @@ export const CLUBS: readonly Club[] = [
     address: "3 Castleview Rd, Whitehead, Carrickfergus BT38 9NA",
     latitude: 54.7558788,
     longitude: -5.7085706,
+  },
+  {
+    id: "belfast",
+    name: "Belfast",
+    listedAs: "Windsor, Belfast Boat Club, Cavehill, Ballynafeigh and Hawarden",
+    address: "Belfast (the middle of the five clubs)",
+    latitude: 54.58959,
+    longitude: -5.91818,
+    locationNote:
+      "Ben's decision: the five outdoor Belfast clubs share one entry. The point is the average of their five locations; none is more than 5.1 km from it. Measured on 11 Oct 2026, their forecasts were close but not identical (see the vision).",
+    includes: [
+      { name: "Windsor Tennis Club", address: "37 Windsor Ave, Belfast BT9 6EJ", latitude: 54.5789615, longitude: -5.9428311 },
+      { name: "Belfast Boat Club", address: "12 Lockview Rd, Stranmillis, Belfast BT9 5FJ", latitude: 54.5693257, longitude: -5.9272395 },
+      { name: "Cavehill Tennis Club", address: "20 N Circular Rd, Belfast BT15 5HB", latitude: 54.6334037, longitude: -5.9423441 },
+      { name: "Ballynafeigh Tennis Club", address: "35A Wynchurch Park, Belfast BT6 0JL", latitude: 54.5695406, longitude: -5.9018683 },
+      { name: "Hawarden Lawn Tennis Club", address: "3 Clonlee Dr, Belfast BT4 3DA", latitude: 54.5967078, longitude: -5.876607 },
+    ],
   },
   {
     id: "newcastle",
