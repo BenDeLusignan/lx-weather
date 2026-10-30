@@ -52,16 +52,18 @@
 }
 
 /*
- * On a phone: one row for up to six hours, otherwise two balanced rows of
- * ceil(n / 2) columns (12 is 6 + 6: 10:00 to 15:00, 16:00 to 21:00; 7 is
- * 4 + 3). One row of n from 48rem. The counts come from stripColumns in
- * format.ts (vision.md "Theme"); the 6 fallback is its HOURS_PER_PHONE_ROW.
+ * The same columns on every day, so every hour box is the same size on every
+ * day (Core flow 3), however many hours that day shows; the cells flow in
+ * order from the left. A day is at most 14 hours (08:00 to 21:00 blocks):
+ * five columns on a phone (5 + 5 + 4, wide enough for "Passable" at 360px, and
+ * seven would not be), seven from 48rem (7 + 7), fourteen from 64rem (one row).
  * Every cell has the same fixed height (hour-cell.module.css) and the rows are
- * equal too, so nothing is ragged in any state.
+ * equal too, so nothing is ragged in any state. loading.module.css repeats
+ * these counts.
  */
 .strip {
   display: grid;
-  grid-template-columns: repeat(var(--columns-phone, 6), minmax(0, 12rem));
+  grid-template-columns: repeat(5, minmax(0, 12rem));
   grid-auto-rows: 1fr;
   gap: var(--space-1);
   margin: 0;
@@ -83,7 +85,14 @@
   }
 
   .strip {
-    grid-template-columns: repeat(var(--columns-wide, 12), minmax(0, 12rem));
+    grid-template-columns: repeat(7, minmax(0, 12rem));
     gap: var(--space-2);
+  }
+}
+
+/* Breakpoint 64rem: see vision.md "Theme". */
+@media (min-width: 64rem) {
+  .strip {
+    grid-template-columns: repeat(14, minmax(0, 12rem));
   }
 }

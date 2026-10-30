@@ -4,8 +4,6 @@
  * keyboards and screen readers get a button that says whether it is open.
  */
 .item {
-  /* Placed by hour so every day lines up (set from gridColumns in format.ts). */
-  grid-column: var(--col-phone);
   min-width: 0;
 }
 
@@ -29,9 +27,10 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
   /*
-   * 11px on a 360px phone, 12px from 390px: "Passable" is the widest word and
-   * a cell is about 51px wide at 360px (12px gutters, 4px gaps) and the word is 50px. Check it at 360 if you change the font, the
-   * padding or the strip's gap.
+   * 11px on a 360px phone, 12px from 390px: "Passable" is the widest word. The
+   * strip is five columns wide here (day-strip.module.css), so a cell is about
+   * 64px at 360px (12px gutters, 4px gaps) and the word is 50px. Check it at
+   * 360 if you change the font, the padding, the strip's gap or its columns.
    */
   font-size: clamp(0.6875rem, 3.333vw - 0.0625rem, 0.75rem);
   line-height: 1.2;
@@ -127,23 +126,30 @@
   box-shadow: var(--shadow-raised);
 }
 
-/* Breakpoint 48rem: see vision.md "Theme". The strip is one row of twelve now. */
+/* Breakpoint 48rem: see vision.md "Theme". The strip is seven columns wide from here. */
 @media (min-width: 48rem) {
-  .item {
-    grid-column: var(--col-wide);
-  }
-
   .cell {
     /*
-     * A cell is (100vw - 136px) / 12 wide here and "Passable" is 4.55 times the
-     * font size, so the size grows with the screen: 11px at 768px, the full
-     * 14px from about 1000px. Re-check at 768 if you change the gap or the gutters.
+     * A cell is (100vw - 96px) / 7 wide at 768px or more (more than 90px, so
+     * 14px, the full size, always fits; "Passable" is 4.55 times the font size).
      */
-    font-size: clamp(0.6875rem, 1.724vw - 0.162rem, var(--font-size-sm));
+    font-size: var(--font-size-sm);
     height: 6.75rem;
   }
 
   .card {
     padding: var(--space-4) var(--space-6);
+  }
+}
+
+/*
+ * Breakpoint 64rem: see vision.md "Theme". The strip is one row of fourteen from
+ * here, so a cell is (100vw - 152px) / 14 wide, at most 71px (the page stops
+ * growing at 72rem): the size grows with the screen, 12px at 1024px to the full
+ * 14px from 1152px. Re-check at 1024 if you change the gap or the gutters.
+ */
+@media (min-width: 64rem) {
+  .cell {
+    font-size: clamp(0.75rem, 1.5625vw - 0.25rem, var(--font-size-sm));
   }
 }

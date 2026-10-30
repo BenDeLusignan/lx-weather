@@ -5,8 +5,17 @@ import { test } from "node:test";
 import { hashPassword } from "@/auth/password";
 import { submitLogin, submitSignUp } from "@/auth/submit";
 import { createUser, updatePreferences, type User } from "@/data/users";
-import { DEFAULT_PREFERENCES } from "./preferences";
-import { submitDays, submitHours, submitTheme } from "./submit";
+import { getDb } from "@/db/client";
+import { user } from "@/db/schema";
+import {
+  DEFAULT_PREFERENCES,
+  WEEKDAYS,
+  daysFromColumns,
+  rangeFieldName,
+  type DayHours,
+} from "./preferences";
+import { submitDays, submitTheme } from "./submit";
+import { eq } from "drizzle-orm";
 
 const NOW = 1_700_000_000;
 
@@ -23,18 +32,35 @@ const form = (name: string, ...values: string[]) => {
   return formData;
 };
 
+/** An Account post: the ticked days, and each day's start and end (default 8 and 21; a browser posts every slider, ticked or not). */
+function daysForm(ticked: readonly string[], times: Record<string, [string, string]> = {}): FormData {
+  const formData = new FormData();
+  for (const id of ticked) formData.append("days", id);
+  for (const weekday of WEEKDAYS) {
+    const [start, end] = times[weekday.id] ?? ["8", "21"];
+    formData.append(rangeFieldName(weekday.id, "start"), start);
+    formData.append(rangeFieldName(weekday.id, "end"), end);
+  }
+  return formData;
+}
+
 async function stored(email: string) {
   const [row] = await usersWithEmail(email);
   assert.ok(row);
-  return { theme: row.theme, days: row.days, hours: row.hours };
+  return { theme: row.theme, days: daysFromColumns(row) };
 }
 
-const UNTOUCHED = { theme: "system", days: 127, hours: 4095 };
+const WHOLE: DayHours = { start: 8, end: 21 };
+const UNTOUCHED = { theme: "system", days: Array(7).fill(WHOLE) };
 
-test("a new account has the defaults: follow the device, every day, every hour", async () => {
+test("a new account has the defaults: follow the device, every day, 08:00 to 22:00", async () => {
   const me = await newUser("defaults@example.com");
   assert.deepEqual(me.preferences, DEFAULT_PREFERENCES);
   assert.deepEqual(await stored("defaults@example.com"), UNTOUCHED);
+  // The raw row, so the column defaults (not just the reader's fallback) are what is saved.
+  const [row] = await usersWithEmail("defaults@example.com");
+  assert.equal(row?.monStart, 8);
+  assert.equal(row?.sunEnd, 21);
 });
 
 // The page the header's switch was used on: both a save and a refusal go back to it.
@@ -62,88 +88,131 @@ test("an unknown, missing or repeated theme changes nothing, sets no cookie and 
   assert.deepEqual(await stored("badtheme@example.com"), UNTOUCHED);
 });
 
-test("days save and persist, in any order and with repeats", async () => {
+test("days and their own hours save and persist: weekdays from 17:00, the weekend all day", async () => {
   const me = await newUser("days@example.com");
-  assert.deepEqual(await submitDays(me, form("days", "sun", "sat", "sat")), { redirect: "/account?saved=days" });
-  assert.equal((await stored("days@example.com")).days, 0b1100000);
+  const weekday = ["17", "21"] as [string, string];
+  const result = await submitDays(
+    me,
+    daysForm(["sun", "sat", "mon", "tue", "wed", "thu", "fri", "sat"], {
+      mon: weekday,
+      tue: weekday,
+      wed: weekday,
+      thu: weekday,
+      fri: weekday,
+    }),
+  );
+  assert.deepEqual(result, { redirect: "/account?saved=days" });
+  const after = await stored("days@example.com");
+  const evening: DayHours = { start: 17, end: 21 };
+  assert.deepEqual(after.days, [evening, evening, evening, evening, evening, WHOLE, WHOLE]);
+  const [row] = await usersWithEmail("days@example.com");
+  assert.equal(row?.friStart, 17, "stored as the day's own columns");
+  assert.equal(row?.satStart, 8);
 });
 
-test("no days, or a day that isn't one, is refused whole: nothing is saved, not even the valid ones", async () => {
-  const me = await newUser("baddays@example.com");
+test("a day that is unticked is saved as off, and the hours it posted are not kept", async () => {
+  const me = await newUser("off@example.com");
+  assert.deepEqual(await submitDays(me, daysForm(["mon", "sun"], { tue: ["10", "12"] })), { redirect: "/account?saved=days" });
+  assert.deepEqual((await stored("off@example.com")).days, [WHOLE, null, null, null, null, null, WHOLE]);
+  const [row] = await usersWithEmail("off@example.com");
+  assert.equal(row?.tueStart, null);
+  assert.equal(row?.tueEnd, null);
+});
+
+test("every day unticked is refused with its own message code, and nothing changes", async () => {
+  const me = await newUser("noday@example.com");
+  assert.deepEqual(await submitDays(me, daysForm([])), { redirect: "/account?error=days" });
   assert.deepEqual(await submitDays(me, new FormData()), { redirect: "/account?error=days" });
-  assert.deepEqual(await submitDays(me, form("days", "sat", "someday")), { redirect: "/account?error=days" });
-  assert.deepEqual(await submitDays(me, form("days", "Sat")), { redirect: "/account?error=days" });
-  assert.deepEqual(await submitDays(me, form("days", "7")), { redirect: "/account?error=days" });
-  assert.deepEqual(await stored("baddays@example.com"), UNTOUCHED);
+  assert.deepEqual(await stored("noday@example.com"), UNTOUCHED);
 });
 
-test("hours save and persist", async () => {
-  const me = await newUser("hours@example.com");
-  assert.deepEqual(await submitHours(me, form("hours", "21", "18", "19", "20")), { redirect: "/account?saved=hours" });
-  assert.equal((await stored("hours@example.com")).hours, 0b111100000000);
-});
-
-test("no hours, or one outside 10 to 21, or not written exactly, is refused and nothing changes", async () => {
-  const me = await newUser("badhours@example.com");
-  assert.deepEqual(await submitHours(me, new FormData()), { redirect: "/account?error=hours" });
-  for (const bad of ["9", "22", "-1", "1000", "010", "10.5", "NaN", "", "ten"]) {
-    assert.deepEqual(await submitHours(me, form("hours", "12", bad)), { redirect: "/account?error=hours" }, bad);
+test("a start after its end, or a time out of bounds or not written exactly, is refused whole and nothing changes", async () => {
+  const me = await newUser("badtimes@example.com");
+  const bad: [string, string][] = [["18", "17"], ["7", "21"], ["8", "22"], ["08", "21"], ["8.5", "21"], ["", ""], ["x", "21"]];
+  for (const times of bad) {
+    // A valid change to Saturday rides along: it must not be saved either.
+    assert.deepEqual(
+      await submitDays(me, daysForm(["mon", "sat"], { mon: times, sat: ["10", "12"] })),
+      { redirect: "/account?error=times" },
+      times.join(" to "),
+    );
   }
-  assert.deepEqual(await stored("badhours@example.com"), UNTOUCHED);
+  assert.deepEqual(await submitDays(me, daysForm(["mon", "someday"])), { redirect: "/account?error=times" }, "an unknown day");
+  assert.deepEqual(await stored("badtimes@example.com"), UNTOUCHED);
 });
 
-test("each form saves only its own setting", async () => {
+test("the time of an unticked day is never checked", async () => {
+  const me = await newUser("unticked@example.com");
+  assert.deepEqual(await submitDays(me, daysForm(["mon"], { tue: ["20", "9"] })), { redirect: "/account?saved=days" });
+});
+
+test("a refused post leaves the theme and the saved week as they were", async () => {
   const me = await newUser("separate@example.com");
-  await submitDays(me, form("days", "mon"));
-  await submitHours(me, form("hours", "10"));
+  await submitDays(me, daysForm(["mon"], { mon: ["17", "21"] }));
   await submitTheme(me, form("theme", "light"), "/");
-  assert.deepEqual(await stored("separate@example.com"), { theme: "light", days: 1, hours: 1 });
-  // A refused post leaves the others as they were.
-  await submitDays(me, new FormData());
-  assert.deepEqual(await stored("separate@example.com"), { theme: "light", days: 1, hours: 1 });
+  const saved = { theme: "light", days: [{ start: 17, end: 21 }, null, null, null, null, null, null] };
+  assert.deepEqual(await stored("separate@example.com"), saved);
+  await submitDays(me, daysForm([]));
+  assert.deepEqual(await stored("separate@example.com"), saved);
 });
 
 test("a visitor can't save anything", async () => {
-  const me = await newUser("visitor@example.com");
+  await newUser("visitor@example.com");
   assert.deepEqual(await submitTheme(null, form("theme", "dark"), "/account"), { redirect: "/" });
-  assert.deepEqual(await submitDays(null, form("days", "mon")), { redirect: "/" });
-  assert.deepEqual(await submitHours(null, form("hours", "10")), { redirect: "/" });
+  assert.deepEqual(await submitDays(null, daysForm(["mon"])), { redirect: "/" });
+  assert.deepEqual(await submitDays(null, daysForm([])), { redirect: "/" });
   assert.deepEqual(await stored("visitor@example.com"), UNTOUCHED);
-  void me;
 });
 
 test("a session for a user who no longer exists is sent to the landing page", async () => {
   const ghost: User = { id: 999_999, email: "ghost@example.com", homeClubId: "omagh", preferences: DEFAULT_PREFERENCES };
-  assert.deepEqual(await submitDays(ghost, form("days", "mon")), { redirect: "/" });
+  assert.deepEqual(await submitDays(ghost, daysForm(["mon"])), { redirect: "/" });
 });
 
 test("the write itself refuses what the form parsing would have, whatever the caller did", async () => {
   const me = await newUser("write@example.com");
+  const off = null;
   assert.equal(await updatePreferences(me.id, { days: [] }), "invalid");
-  assert.equal(await updatePreferences(me.id, { days: [7] }), "invalid");
-  assert.equal(await updatePreferences(me.id, { hours: [] }), "invalid");
-  assert.equal(await updatePreferences(me.id, { hours: [9] }), "invalid");
-  assert.equal(await updatePreferences(me.id, { hours: [22] }), "invalid");
+  assert.equal(await updatePreferences(me.id, { days: Array(7).fill(off) }), "invalid", "every day off");
+  assert.equal(await updatePreferences(me.id, { days: Array(6).fill(WHOLE) }), "invalid", "six days");
+  assert.equal(await updatePreferences(me.id, { days: [{ start: 9, end: 8 }, ...Array(6).fill(WHOLE)] }), "invalid", "start after end");
+  assert.equal(await updatePreferences(me.id, { days: [{ start: 7, end: 21 }, ...Array(6).fill(WHOLE)] }), "invalid", "before 8");
+  assert.equal(await updatePreferences(me.id, { days: [{ start: 8, end: 22 }, ...Array(6).fill(WHOLE)] }), "invalid", "after 21");
+  assert.equal(await updatePreferences(me.id, { days: [{ start: 8.5, end: 21 }, ...Array(6).fill(WHOLE)] }), "invalid", "not whole");
   assert.equal(await updatePreferences(me.id, { theme: "neon" as never }), "invalid");
   assert.equal(await updatePreferences(me.id, {}), "invalid", "nothing to write");
   // One bad part refuses the whole change: the good theme is not saved either.
   assert.equal(await updatePreferences(me.id, { theme: "dark", days: [] }), "invalid");
   assert.deepEqual(await stored("write@example.com"), UNTOUCHED);
 
-  assert.equal(await updatePreferences(me.id, { theme: "dark", days: [5, 6], hours: [18] }), "saved");
-  assert.deepEqual(await stored("write@example.com"), { theme: "dark", days: 0b1100000, hours: 0b100000000 });
+  const week = [off, off, off, off, off, { start: 18, end: 21 }, { start: 9, end: 9 }];
+  assert.equal(await updatePreferences(me.id, { theme: "dark", days: week }), "saved");
+  assert.deepEqual(await stored("write@example.com"), { theme: "dark", days: week });
   assert.equal(await updatePreferences(999_999, { theme: "dark" }), "not-found");
 });
 
-test("the table itself refuses an empty or out-of-range set from a raw write", async () => {
+test("the table itself refuses a half-set, out-of-range, crossed or all-off week from a raw write", async () => {
   const me = await newUser("raw@example.com");
-  const { getDb } = await import("@/db/client");
-  const { user } = await import("@/db/schema");
-  const { eq } = await import("drizzle-orm");
-  for (const bad of [{ days: 0 }, { days: 128 }, { hours: 0 }, { hours: 4096 }, { theme: "neon" }]) {
-    await assert.rejects(getDb().update(user).set(bad).where(eq(user.id, me.id)), String(JSON.stringify(bad)));
+  const allOff = Object.fromEntries(WEEKDAYS.flatMap((day) => [[`${day.id}Start`, null], [`${day.id}End`, null]]));
+  for (const bad of [
+    { monStart: 8, monEnd: null },
+    { monStart: null, monEnd: 21 },
+    { monStart: 7, monEnd: 21 },
+    { monStart: 8, monEnd: 22 },
+    { monStart: 22, monEnd: 22 },
+    { monStart: 18, monEnd: 17 },
+    { monStart: 8.5, monEnd: 21 },
+    { monStart: "8x", monEnd: 21 },
+    { sunStart: 20, sunEnd: 10 },
+    { theme: "neon" },
+    allOff,
+  ]) {
+    await assert.rejects(getDb().update(user).set(bad as never).where(eq(user.id, me.id)), JSON.stringify(bad));
   }
   assert.deepEqual(await stored("raw@example.com"), UNTOUCHED);
+  // The bounds are inclusive, and one day on is enough.
+  await getDb().update(user).set({ monStart: 8, monEnd: 8 }).where(eq(user.id, me.id));
+  await getDb().update(user).set({ sunStart: 21, sunEnd: 21 }).where(eq(user.id, me.id));
 });
 
 test("log in and sign up carry the account's theme, so the device's theme cookie follows who just logged in", async () => {

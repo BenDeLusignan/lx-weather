@@ -1,9 +1,7 @@
-import type { CSSProperties } from "react";
 import type { Block } from "@/forecast/blocks";
 import {
   formatRainChance,
   formatWindMph,
-  gridColumns,
   hourLabel,
   lightWord,
   NO_DATA_MARK,
@@ -31,30 +29,15 @@ const TONE = { green: "good", yellow: "passable", red: "unlikely" } as const;
  * that was open (a browser without that support just lets several open).
  * Tapping the open cell again closes it.
  *
- * `position` is the hour's place among the user's `hourCount` chosen hours (0
- * is the first): it sets the grid column, so a chosen hour is in the same
- * column on every day.
+ * Where the box sits in the strip is the strip's business (the grid flows in
+ * order, day-strip.module.css), so the cell knows nothing about its column.
  */
-export function HourCell({
-  block,
-  dayHeading,
-  position,
-  hourCount,
-}: {
-  block: Block;
-  dayHeading: string;
-  position: number;
-  hourCount: number;
-}) {
-  const columns = gridColumns(position, hourCount);
+export function HourCell({ block, dayHeading }: { block: Block; dayHeading: string }) {
   const rain = block.rainChancePercent.value;
   const windMph = block.wind.mph;
 
   return (
-    <li
-      className={styles.item}
-      style={{ "--col-phone": columns.phone, "--col-wide": columns.wide } as CSSProperties}
-    >
+    <li className={styles.item}>
       <details name="hour" className={styles.details}>
         <summary className={`${styles.cell} ${styles[block.light ? TONE[block.light] : "unknown"]}`}>
           <span className={styles.hour}>

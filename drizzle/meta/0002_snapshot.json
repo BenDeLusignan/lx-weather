@@ -1,0 +1,304 @@
+{
+  "version": "6",
+  "dialect": "sqlite",
+  "id": "d4f14a29-aa46-4151-9c36-b57eb2bba3a4",
+  "prevId": "a283e5a5-55be-4028-80c6-bc42b9a05a21",
+  "tables": {
+    "login_attempt": {
+      "name": "login_attempt",
+      "columns": {
+        "attempt_key": {
+          "name": "attempt_key",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "failures": {
+          "name": "failures",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "window_expires_at": {
+          "name": "window_expires_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "locked_until": {
+          "name": "locked_until",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "lockout_level": {
+          "name": "lockout_level",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "login_attempt_expiry_idx": {
+          "name": "login_attempt_expiry_idx",
+          "columns": [
+            "window_expires_at",
+            "locked_until"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "login_attempt_key_not_blank": {
+          "name": "login_attempt_key_not_blank",
+          "value": "length(\"login_attempt\".\"attempt_key\") > 0"
+        },
+        "login_attempt_counters_valid": {
+          "name": "login_attempt_counters_valid",
+          "value": "\"login_attempt\".\"failures\" >= 0 AND \"login_attempt\".\"window_expires_at\" >= 0 AND \"login_attempt\".\"locked_until\" >= 0 AND \"login_attempt\".\"lockout_level\" >= 0"
+        }
+      }
+    },
+    "user": {
+      "name": "user",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "password_hash": {
+          "name": "password_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "home_club_id": {
+          "name": "home_club_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch())"
+        },
+        "theme": {
+          "name": "theme",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'system'"
+        },
+        "mon_start": {
+          "name": "mon_start",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": 8
+        },
+        "mon_end": {
+          "name": "mon_end",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": 21
+        },
+        "tue_start": {
+          "name": "tue_start",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": 8
+        },
+        "tue_end": {
+          "name": "tue_end",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": 21
+        },
+        "wed_start": {
+          "name": "wed_start",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": 8
+        },
+        "wed_end": {
+          "name": "wed_end",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": 21
+        },
+        "thu_start": {
+          "name": "thu_start",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": 8
+        },
+        "thu_end": {
+          "name": "thu_end",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": 21
+        },
+        "fri_start": {
+          "name": "fri_start",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": 8
+        },
+        "fri_end": {
+          "name": "fri_end",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": 21
+        },
+        "sat_start": {
+          "name": "sat_start",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": 8
+        },
+        "sat_end": {
+          "name": "sat_end",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": 21
+        },
+        "sun_start": {
+          "name": "sun_start",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": 8
+        },
+        "sun_end": {
+          "name": "sun_end",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": 21
+        }
+      },
+      "indexes": {
+        "user_email_unique": {
+          "name": "user_email_unique",
+          "columns": [
+            "email"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "user_email_normalised": {
+          "name": "user_email_normalised",
+          "value": "\"user\".\"email\" = lower(trim(\"user\".\"email\"))"
+        },
+        "user_email_length": {
+          "name": "user_email_length",
+          "value": "length(\"user\".\"email\") BETWEEN 3 AND 254"
+        },
+        "user_home_club_not_blank": {
+          "name": "user_home_club_not_blank",
+          "value": "length(\"user\".\"home_club_id\") > 0"
+        },
+        "user_theme_valid": {
+          "name": "user_theme_valid",
+          "value": "\"user\".\"theme\" IN ('system', 'light', 'dark')"
+        },
+        "user_mon_hours_valid": {
+          "name": "user_mon_hours_valid",
+          "value": "(\"user\".\"mon_start\" IS NULL AND \"user\".\"mon_end\" IS NULL) OR (typeof(\"user\".\"mon_start\") = 'integer' AND typeof(\"user\".\"mon_end\") = 'integer' AND \"user\".\"mon_start\" BETWEEN 8 AND 21 AND \"user\".\"mon_end\" BETWEEN \"user\".\"mon_start\" AND 21)"
+        },
+        "user_tue_hours_valid": {
+          "name": "user_tue_hours_valid",
+          "value": "(\"user\".\"tue_start\" IS NULL AND \"user\".\"tue_end\" IS NULL) OR (typeof(\"user\".\"tue_start\") = 'integer' AND typeof(\"user\".\"tue_end\") = 'integer' AND \"user\".\"tue_start\" BETWEEN 8 AND 21 AND \"user\".\"tue_end\" BETWEEN \"user\".\"tue_start\" AND 21)"
+        },
+        "user_wed_hours_valid": {
+          "name": "user_wed_hours_valid",
+          "value": "(\"user\".\"wed_start\" IS NULL AND \"user\".\"wed_end\" IS NULL) OR (typeof(\"user\".\"wed_start\") = 'integer' AND typeof(\"user\".\"wed_end\") = 'integer' AND \"user\".\"wed_start\" BETWEEN 8 AND 21 AND \"user\".\"wed_end\" BETWEEN \"user\".\"wed_start\" AND 21)"
+        },
+        "user_thu_hours_valid": {
+          "name": "user_thu_hours_valid",
+          "value": "(\"user\".\"thu_start\" IS NULL AND \"user\".\"thu_end\" IS NULL) OR (typeof(\"user\".\"thu_start\") = 'integer' AND typeof(\"user\".\"thu_end\") = 'integer' AND \"user\".\"thu_start\" BETWEEN 8 AND 21 AND \"user\".\"thu_end\" BETWEEN \"user\".\"thu_start\" AND 21)"
+        },
+        "user_fri_hours_valid": {
+          "name": "user_fri_hours_valid",
+          "value": "(\"user\".\"fri_start\" IS NULL AND \"user\".\"fri_end\" IS NULL) OR (typeof(\"user\".\"fri_start\") = 'integer' AND typeof(\"user\".\"fri_end\") = 'integer' AND \"user\".\"fri_start\" BETWEEN 8 AND 21 AND \"user\".\"fri_end\" BETWEEN \"user\".\"fri_start\" AND 21)"
+        },
+        "user_sat_hours_valid": {
+          "name": "user_sat_hours_valid",
+          "value": "(\"user\".\"sat_start\" IS NULL AND \"user\".\"sat_end\" IS NULL) OR (typeof(\"user\".\"sat_start\") = 'integer' AND typeof(\"user\".\"sat_end\") = 'integer' AND \"user\".\"sat_start\" BETWEEN 8 AND 21 AND \"user\".\"sat_end\" BETWEEN \"user\".\"sat_start\" AND 21)"
+        },
+        "user_sun_hours_valid": {
+          "name": "user_sun_hours_valid",
+          "value": "(\"user\".\"sun_start\" IS NULL AND \"user\".\"sun_end\" IS NULL) OR (typeof(\"user\".\"sun_start\") = 'integer' AND typeof(\"user\".\"sun_end\") = 'integer' AND \"user\".\"sun_start\" BETWEEN 8 AND 21 AND \"user\".\"sun_end\" BETWEEN \"user\".\"sun_start\" AND 21)"
+        },
+        "user_one_day_on": {
+          "name": "user_one_day_on",
+          "value": "\"user\".\"mon_start\" IS NOT NULL OR \"user\".\"tue_start\" IS NOT NULL OR \"user\".\"wed_start\" IS NOT NULL OR \"user\".\"thu_start\" IS NOT NULL OR \"user\".\"fri_start\" IS NOT NULL OR \"user\".\"sat_start\" IS NOT NULL OR \"user\".\"sun_start\" IS NOT NULL"
+        }
+      }
+    }
+  },
+  "views": {},
+  "enums": {},
+  "_meta": {
+    "schemas": {},
+    "tables": {},
+    "columns": {}
+  },
+  "internal": {
+    "indexes": {}
+  }
+}

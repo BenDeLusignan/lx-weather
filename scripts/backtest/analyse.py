@@ -4,8 +4,10 @@ Data in:  cache/obs/<STATION>.csv   (fetch_obs.py)      Iowa Environmental Meson
           cache/fc/<loc>_*.json     (fetch_forecasts.py) Open-Meteo Previous Runs API
 Data out: results/summary.txt, results/by_lead.csv, results/bootstrap.csv, results/reliability.csv
 
-Everything is evaluated per UK-time hour block 10:00-11:00 .. 21:00-22:00 exactly as src/forecast/blocks.ts builds
-blocks: rain = the stamp at the block END (precipitation is the preceding-hour sum), wind = mean of the START and END stamps.
+Everything is evaluated per UK-time hour block 10:00-11:00 .. 21:00-22:00, the window src/forecast/blocks.ts built when this
+was run (11 Oct 2026; the app's window has since widened to start at 08:00, so the results cover 10:00 onwards only), and
+per block exactly as blocks.ts builds it: rain = the stamp at the block END (precipitation is the preceding-hour sum), wind =
+mean of the START and END stamps.
 """
 import argparse, glob, json, re, sys
 import numpy as np

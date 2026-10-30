@@ -11,8 +11,8 @@ import { Notice } from "./notice";
 const CANT_LOAD = "The forecast can’t be loaded right now. Please try again in a few minutes.";
 
 /**
- * The user's chosen days and hours of the week for one club (the default is
- * all seven days and all twelve hours). Both honest empty states show words
+ * The user's chosen days of the week, each with its own hours, for one club
+ * (the default is all seven days and all fourteen hours). Both honest empty states show words
  * and no numbers: the fetch failed, or it worked but all five providers have
  * nothing (vision, Current state: the fetch still returns normally then).
  */
@@ -21,7 +21,7 @@ export async function ClubWeek({
   preferences,
 }: {
   clubId: string;
-  preferences: Pick<Preferences, "days" | "hours">;
+  preferences: Pick<Preferences, "days">;
 }) {
   const load = await loadClubForecast(clubId);
   if (!load.ok || load.forecast.unavailable.length >= PROVIDER_TOTAL) {
@@ -40,13 +40,7 @@ export async function ClubWeek({
       <UnavailableProviders forecast={load.forecast} />
       <div className={styles.days}>
         {week.map((shown, i) => (
-          <DayStrip
-            key={shown.day.date}
-            clubId={clubId}
-            shown={shown}
-            hours={preferences.hours}
-            last={i === week.length - 1}
-          />
+          <DayStrip key={shown.day.date} clubId={clubId} shown={shown} last={i === week.length - 1} />
         ))}
       </div>
     </div>

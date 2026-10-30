@@ -115,7 +115,7 @@
  * 8.5 / 7.9 / 6.6 dark (good / passable / unlikely).
  *
  * Breakpoints (custom properties can't go in @media, so they are written in
- * vision.md "Theme"): mobile-first, 48rem is the only one the site uses.
+ * vision.md "Theme"): mobile-first, 48rem and 64rem are the two the site uses.
  */
 
 :root {

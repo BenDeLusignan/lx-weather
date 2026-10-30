@@ -6,7 +6,7 @@ import { getCurrentUser } from "@/auth/current-user";
 import type { PasswordChangeError } from "@/auth/submit";
 import { findClub } from "@/clubs/lookup";
 import { SubmitButton } from "@/components/button";
-import { ChoiceGroup } from "@/components/choice-group";
+import { DayHoursGroup } from "@/components/day-hours-group";
 import { ClubSelect } from "@/components/club-select";
 import { Field, controlClassName, describedBy, hintId } from "@/components/field";
 import { Form } from "@/components/form";
@@ -17,14 +17,12 @@ import { NewPasswordInput } from "@/components/new-password-input";
 import { PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH } from "@/data/limits";
 import { lockoutMessage } from "@/forms/lockout-message";
 import { PASSWORD_REQUIREMENT } from "@/forms/password-rules";
-import { BLOCK_HOURS, WEEKDAYS } from "@/preferences/preferences";
-import { saveDays, saveHours } from "@/preferences/actions";
-import { hourLabel } from "@/weather/format";
+import { saveDays } from "@/preferences/actions";
 import styles from "./page.module.css";
 
 export const metadata: Metadata = {
   title: "Account",
-  description: "Your email, your home club, your password, the days and hours you see, and log out.",
+  description: "Your email, your home club, your password, the days and times you see, and log out.",
 };
 
 // The codes the changePassword action redirects with, each with its own message.
@@ -167,54 +165,22 @@ async function Account({ searchParams }: Pick<PageProps<"/account">, "searchPara
       </section>
 
       <section aria-labelledby="account-days" className={styles.section}>
-        <h2 id="account-days">Days you see</h2>
+        <h2 id="account-days">Days and times you see</h2>
         <Form action={saveDays}>
+          {/* One message takes focus: the refusal that matters, or the confirmation. */}
           {error === "days" ? (
             <FormMessage tone="error">Choose at least one day. Nothing was changed.</FormMessage>
+          ) : error === "times" ? (
+            <FormMessage tone="error">
+              Those times can’t be saved: each day’s start must be no later than its end, from 08:00 to 22:00. Nothing
+              was changed.
+            </FormMessage>
           ) : saved === "days" ? (
-            <FormMessage tone="success">Days saved.</FormMessage>
+            <FormMessage tone="success">Days and times saved.</FormMessage>
           ) : null}
-          <ChoiceGroup
-            legend="Show these days"
-            hint="The week always starts today. A day you switch off isn’t shown at any club."
-            hintId="account-days-hint"
-            type="checkbox"
-            name="days"
-            choices={WEEKDAYS.map((day, index) => ({
-              value: day.id,
-              label: day.label,
-              checked: user.preferences.days.includes(index),
-            }))}
-          />
+          <DayHoursGroup days={user.preferences.days} />
           <div>
-            <SubmitButton>Save days</SubmitButton>
-          </div>
-        </Form>
-      </section>
-
-      <section aria-labelledby="account-hours" className={styles.section}>
-        <h2 id="account-hours">Times you see</h2>
-        <Form action={saveHours}>
-          {error === "hours" ? (
-            <FormMessage tone="error">Choose at least one time. Nothing was changed.</FormMessage>
-          ) : saved === "hours" ? (
-            <FormMessage tone="success">Times saved.</FormMessage>
-          ) : null}
-          <ChoiceGroup
-            legend="Show these times"
-            hint="10:00 means 10:00 to 11:00. Applies to every club."
-            hintId="account-hours-hint"
-            type="checkbox"
-            name="hours"
-            wide
-            choices={BLOCK_HOURS.map((hour) => ({
-              value: String(hour),
-              label: hourLabel(hour),
-              checked: user.preferences.hours.includes(hour),
-            }))}
-          />
-          <div>
-            <SubmitButton>Save times</SubmitButton>
+            <SubmitButton>Save days and times</SubmitButton>
           </div>
         </Form>
       </section>

@@ -7,7 +7,24 @@
  * migration into `drizzle/`, and commit both together.
  */
 import { sql } from "drizzle-orm";
-import { check, index, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { check, index, integer, sqliteTable, text, type AnySQLiteColumn } from "drizzle-orm/sqlite-core";
+
+/**
+ * A weekday's chosen hours: both NULL (the day is switched off) or a start
+ * and end block hour from 8 to 21 with start <= end, whole numbers (an
+ * INTEGER column would otherwise keep 8.5). The NULL tests are explicit
+ * because a CHECK that evaluates to NULL passes: `NULL BETWEEN 8 AND 21`
+ * alone would let a start with no end in. Plain numbers, pinned to
+ * `FIRST_BLOCK_HOUR` and `LAST_BLOCK_HOUR` by a test in
+ * `src/preferences/preferences.test.ts`; this file is loaded by drizzle-kit
+ * without the `@/` alias, so it can't import them.
+ */
+function dayHoursValid(name: string, start: AnySQLiteColumn, end: AnySQLiteColumn) {
+  return check(
+    name,
+    sql`(${start} IS NULL AND ${end} IS NULL) OR (typeof(${start}) = 'integer' AND typeof(${end}) = 'integer' AND ${start} BETWEEN 8 AND 21 AND ${end} BETWEEN ${start} AND 21)`,
+  );
+}
 
 /**
  * A person with an account. AUTOINCREMENT so an id is never reused after a
@@ -33,15 +50,27 @@ export const user = sqliteTable(
       .default(sql`(unixepoch())`),
     /**
      * The user's own settings (`src/preferences/preferences.ts` explains the
-     * bit layout). The defaults are how the site worked before these existed,
-     * so an existing row reads as: follow the device, every day, every hour.
-     * `theme` is 'system' | 'light' | 'dark'; `days` is a Monday-first bitmask
-     * of the weekdays to show; `hours` a bitmask of the twelve blocks (10:00
-     * to 21:00) to show.
+     * layout). `theme` is 'system' | 'light' | 'dark'. Each weekday has a
+     * start and an end: the start hours of the first and last block shown
+     * (8 to 21, so 17 and 21 is 17:00 to 22:00); both NULL is a day that is
+     * switched off. The defaults are the whole window, every day, so an
+     * account that never touches them sees everything.
      */
     theme: text("theme").notNull().default("system"),
-    days: integer("days").notNull().default(127),
-    hours: integer("hours").notNull().default(4095),
+    monStart: integer("mon_start").default(8),
+    monEnd: integer("mon_end").default(21),
+    tueStart: integer("tue_start").default(8),
+    tueEnd: integer("tue_end").default(21),
+    wedStart: integer("wed_start").default(8),
+    wedEnd: integer("wed_end").default(21),
+    thuStart: integer("thu_start").default(8),
+    thuEnd: integer("thu_end").default(21),
+    friStart: integer("fri_start").default(8),
+    friEnd: integer("fri_end").default(21),
+    satStart: integer("sat_start").default(8),
+    satEnd: integer("sat_end").default(21),
+    sunStart: integer("sun_start").default(8),
+    sunEnd: integer("sun_end").default(21),
   },
   (table) => [
     // The app stores `trim(lower(email))`; these pin it against a raw insert,
@@ -50,13 +79,19 @@ export const user = sqliteTable(
     // Same cap as EMAIL_MAX_LENGTH in src/data/limits.ts.
     check("user_email_length", sql`length(${table.email}) BETWEEN 3 AND 254`),
     check("user_home_club_not_blank", sql`length(${table.homeClubId}) > 0`),
-    // At least one day and one hour, and no bit outside the week (7 bits: 127)
-    // or the twelve hours (12 bits: 4095). Pinned to the constants in
-    // src/preferences/preferences.ts by a test; the schema is written in
-    // plain numbers because drizzle-kit loads this file without the `@/` alias.
     check("user_theme_valid", sql`${table.theme} IN ('system', 'light', 'dark')`),
-    check("user_days_valid", sql`${table.days} BETWEEN 1 AND 127`),
-    check("user_hours_valid", sql`${table.hours} BETWEEN 1 AND 4095`),
+    dayHoursValid("user_mon_hours_valid", table.monStart, table.monEnd),
+    dayHoursValid("user_tue_hours_valid", table.tueStart, table.tueEnd),
+    dayHoursValid("user_wed_hours_valid", table.wedStart, table.wedEnd),
+    dayHoursValid("user_thu_hours_valid", table.thuStart, table.thuEnd),
+    dayHoursValid("user_fri_hours_valid", table.friStart, table.friEnd),
+    dayHoursValid("user_sat_hours_valid", table.satStart, table.satEnd),
+    dayHoursValid("user_sun_hours_valid", table.sunStart, table.sunEnd),
+    // At least one day on, so the week is never blank (vision, Core flow 8).
+    check(
+      "user_one_day_on",
+      sql`${table.monStart} IS NOT NULL OR ${table.tueStart} IS NOT NULL OR ${table.wedStart} IS NOT NULL OR ${table.thuStart} IS NOT NULL OR ${table.friStart} IS NOT NULL OR ${table.satStart} IS NOT NULL OR ${table.sunStart} IS NOT NULL`,
+    ),
   ],
 );
 

@@ -1,5 +1,3 @@
-import { stripColumns } from "@/weather/format";
-import type { CSSProperties } from "react";
 import styles from "./loading.module.css";
 
 /**
@@ -22,26 +20,23 @@ export function PageLoading() {
 }
 
 /**
- * The fallback for the forecast itself, which may have to be fetched: seven
- * days of grey cells in the shape of the real week, under a "Loading the
- * forecast" line. The club's name and buttons are already on screen. The
- * counts are the user's chosen days and hours, so it has the shape of the week
- * that will arrive (the week is always seven consecutive days, so a chosen
- * number of weekdays is exactly that many days).
+ * The fallback for the forecast itself, which may have to be fetched: a day
+ * of grey cells for each chosen day, in the shape of the real week, under a
+ * "Loading the forecast" line. The club's name and buttons are already on
+ * screen. `hourCounts` is one number per chosen day, in the week's order
+ * (`shownHourCounts` in `src/preferences/week-view.ts`): each day has the
+ * hours that weekday is set to, so it has the shape of the week that will
+ * arrive.
  */
-export function WeekLoading({ dayCount, hourCount }: { dayCount: number; hourCount: number }) {
-  const columns = stripColumns(hourCount);
+export function WeekLoading({ hourCounts }: { hourCounts: readonly number[] }) {
   return (
     <div role="status">
       <p className="visually-hidden">Loading the forecast…</p>
       <ol aria-hidden="true" className={styles.week}>
-        {Array.from({ length: dayCount }, (_, day) => (
+        {hourCounts.map((hourCount, day) => (
           <li key={day} className={styles.day}>
             <div className={`${styles.bar} ${styles.dayTitle}`} />
-            <div
-              className={styles.cells}
-              style={{ "--columns-phone": columns.phone, "--columns-wide": columns.wide } as CSSProperties}
-            >
+            <div className={styles.cells}>
               {Array.from({ length: hourCount }, (_, hour) => (
                 <div key={hour} className={styles.cell} />
               ))}

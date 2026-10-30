@@ -45,7 +45,7 @@ test("the worse of rain and wind wins; an unknown is never guessed", () => {
   }
 });
 
-test("a week is today plus six days, twelve blocks a day, 10:00-11:00 to 21:00-22:00 UK time", () => {
+test("a week is today plus six days, fourteen blocks a day, 08:00-09:00 to 21:00-22:00 UK time", () => {
   const now = new Date(MIDNIGHT_11_OCT);
   const days = buildWeek(constantWeek({ temp: 10, rain: 0, wind: 0 }), { now });
   assert.deepEqual(
@@ -53,23 +53,31 @@ test("a week is today plus six days, twelve blocks a day, 10:00-11:00 to 21:00-2
     ["2026-10-11", "2026-10-12", "2026-10-13", "2026-10-14", "2026-10-15", "2026-10-16", "2026-10-17"],
   );
   for (const day of days) {
-    assert.equal(day.blocks.length, 12);
-    assert.deepEqual(day.blocks.map((b) => b.startHour), [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]);
+    assert.equal(day.blocks.length, 14);
+    assert.deepEqual(day.blocks.map((b) => b.startHour), [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]);
     assert.ok(day.blocks.every((b) => b.date === day.date));
   }
-  // 10:00 BST is 09:00 UTC.
-  assert.equal(days[0]?.blocks[0]?.start, "2026-10-11T09:00:00.000Z");
+  // 08:00 BST is 07:00 UTC, and the last block starts at 21:00 BST, 20:00 UTC.
+  assert.equal(days[0]?.blocks[0]?.start, "2026-10-11T07:00:00.000Z");
+  assert.equal(days[0]?.blocks[13]?.start, "2026-10-11T20:00:00.000Z");
 });
 
 test("blocks of today that are over are omitted; the one in progress stays", () => {
   const forecast = constantWeek({ temp: 10, rain: 0, wind: 0 });
-  // 12:30 BST: 10-11 and 11-12 are over; 12-13 is under way.
+  // 12:30 BST: 08-09 to 11-12 are over; 12-13 is under way.
   const midMorning = buildWeek(forecast, { now: new Date("2026-10-11T11:30:00.000Z") });
   assert.deepEqual(midMorning[0]?.blocks.map((b) => b.startHour), [12, 13, 14, 15, 16, 17, 18, 19, 20, 21]);
-  assert.equal(midMorning[1]?.blocks.length, 12);
+  assert.equal(midMorning[1]?.blocks.length, 14);
   // Exactly 14:00 BST: the 12-13 and 13-14 blocks have ended.
   const twoPm = buildWeek(forecast, { now: new Date("2026-10-11T13:00:00.000Z") });
   assert.equal(twoPm[0]?.blocks[0]?.startHour, 14);
+  // Early morning: before 08:00 nothing is over, and the 08:00 block stays while it is under way.
+  const beforeEight = buildWeek(forecast, { now: new Date("2026-10-11T06:30:00.000Z") });
+  assert.equal(beforeEight[0]?.blocks.length, 14);
+  const halfPastEight = buildWeek(forecast, { now: new Date("2026-10-11T07:30:00.000Z") });
+  assert.equal(halfPastEight[0]?.blocks[0]?.startHour, 8);
+  const nine = buildWeek(forecast, { now: new Date("2026-10-11T08:00:00.000Z") });
+  assert.equal(nine[0]?.blocks[0]?.startHour, 9, "the 08:00 block ended at 09:00 BST");
   // 22:00 BST: nothing left today, but the day is still the first of the week.
   const evening = buildWeek(forecast, { now: new Date("2026-10-11T21:00:00.000Z") });
   assert.equal(evening[0]?.date, "2026-10-11");
@@ -95,30 +103,30 @@ test("hour mapping: rain from the stamp ending the block, temperature and wind f
       windMph: byIndex((i) => i * 4),
     },
   });
-  const block = buildWeek(forecast, { now: new Date(MIDNIGHT_11_OCT) })[0]?.blocks[0]; // 10:00-11:00
-  assert.equal(block?.rainChancePercent.value, 11); // the 11:00 stamp
-  assert.equal(block?.temperatureC.value, 21); // mean of 10*2 and 11*2
-  assert.equal(block?.wind.mph, 42); // mean of 10*4 and 11*4
-  assert.equal(block?.wind.kmh, 42 * 1.609344);
+  const block = buildWeek(forecast, { now: new Date(MIDNIGHT_11_OCT) })[0]?.blocks[0]; // 08:00-09:00
+  assert.equal(block?.rainChancePercent.value, 9); // the 09:00 stamp
+  assert.equal(block?.temperatureC.value, 17); // mean of 8*2 and 9*2
+  assert.equal(block?.wind.mph, 34); // mean of 8*4 and 9*4
+  assert.equal(block?.wind.kmh, 34 * 1.609344);
 });
 
 test("a gap is a gap: a provider missing one of a block's stamps gives nothing for that block only", () => {
   const full = column(MIDNIGHT_11_OCT, WEEK_HOURS, () => 20);
-  const gappy = full.map((v, i) => (i === 11 ? null : v)); // the 11:00 stamp of the first block
+  const gappy = full.map((v, i) => (i === 9 ? null : v)); // the 09:00 stamp of the first block
   const forecast = forecastOf(MIDNIGHT_11_OCT, WEEK_HOURS, {
     ukmo: { temperatureC: gappy, rainChancePercent: gappy, windMph: gappy },
     ecmwf: { temperatureC: full, rainChancePercent: full, windMph: full },
   });
   const [first, second, third] = buildWeek(forecast, { now: new Date(MIDNIGHT_11_OCT) })[0]?.blocks ?? [];
-  // 10-11 needs the 11:00 stamp: ukmo drops out of all three figures.
+  // 08-09 needs the 09:00 stamp: ukmo drops out of all three figures.
   assert.equal(first?.rainChancePercent.providerCount, 1);
   assert.equal(first?.temperatureC.providerCount, 1);
   assert.equal(first?.wind.providerCount, 1);
   assert.equal(first?.temperatureC.byProvider.ukmo, null);
-  // 11-12 also needs it (its start stamp, for temperature and wind), but its rain only needs 12:00.
+  // 09-10 also needs it (its start stamp, for temperature and wind), but its rain only needs 10:00.
   assert.equal(second?.rainChancePercent.providerCount, 2);
   assert.equal(second?.temperatureC.providerCount, 1);
-  // 12-13 is untouched.
+  // 10-11 is untouched.
   assert.equal(third?.temperatureC.providerCount, 2);
   assert.equal(third?.rainChancePercent.providerCount, 2);
 });
@@ -173,7 +181,7 @@ test("a block with no data is returned with null figures and a null light, never
     assert.equal(block.windLight, null);
     assert.equal(block.light, null);
   }
-  assert.equal(days[1]?.blocks.length, 12);
+  assert.equal(days[1]?.blocks.length, 14);
 });
 
 test("rain is known but wind is not: yellow/green is unknown, red stays red", () => {
@@ -186,7 +194,7 @@ test("rain is known but wind is not: yellow/green is unknown, red stays red", ()
   assert.equal(buildWeek(rainOnly(90), { now })[0]?.blocks[0]?.light, "red");
 });
 
-test("a clock change inside the week: the day has 25 hours but still twelve blocks at the right UK times", () => {
+test("a clock change inside the week: the day has 25 hours but still fourteen blocks at the right UK times", () => {
   // Clocks go back at 02:00 BST on Sun 25 Oct 2026. UK midnight 24 Oct is 23:00 UTC on the 23rd.
   const start = "2026-10-23T23:00:00.000Z";
   const hours = 7 * 24 + 1 + 1;
@@ -198,13 +206,13 @@ test("a clock change inside the week: the day has 25 hours but still twelve bloc
     days.map((d) => d.date),
     ["2026-10-24", "2026-10-25", "2026-10-26", "2026-10-27", "2026-10-28", "2026-10-29", "2026-10-30"],
   );
-  for (const day of days) assert.equal(day.blocks.length, 12);
-  // 24 Oct is BST: 10:00 UK = 09:00 UTC, rain from the 11:00 UK = 10:00 UTC stamp.
-  assert.equal(days[0]?.blocks[0]?.start, "2026-10-24T09:00:00.000Z");
-  assert.equal(days[0]?.blocks[0]?.rainChancePercent.value, 10);
-  // 25 Oct (the long day) and after are GMT: 10:00 UK = 10:00 UTC.
-  assert.equal(days[1]?.blocks[0]?.start, "2026-10-25T10:00:00.000Z");
-  assert.equal(days[1]?.blocks[0]?.rainChancePercent.value, 11);
-  assert.equal(days[1]?.blocks[11]?.start, "2026-10-25T21:00:00.000Z");
-  assert.equal(days[2]?.blocks[0]?.start, "2026-10-26T10:00:00.000Z");
+  for (const day of days) assert.equal(day.blocks.length, 14);
+  // 24 Oct is BST: 08:00 UK = 07:00 UTC, rain from the 09:00 UK = 08:00 UTC stamp.
+  assert.equal(days[0]?.blocks[0]?.start, "2026-10-24T07:00:00.000Z");
+  assert.equal(days[0]?.blocks[0]?.rainChancePercent.value, 8);
+  // 25 Oct (the long day) and after are GMT: 08:00 UK = 08:00 UTC.
+  assert.equal(days[1]?.blocks[0]?.start, "2026-10-25T08:00:00.000Z");
+  assert.equal(days[1]?.blocks[0]?.rainChancePercent.value, 9);
+  assert.equal(days[1]?.blocks[13]?.start, "2026-10-25T21:00:00.000Z");
+  assert.equal(days[2]?.blocks[0]?.start, "2026-10-26T08:00:00.000Z");
 });

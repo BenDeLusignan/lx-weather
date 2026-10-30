@@ -4,11 +4,9 @@ import { isClubId } from "@/clubs/lookup";
 import { getDb } from "@/db/client";
 import { user } from "@/db/schema";
 import {
-  daysToMask,
-  hoursToMask,
+  daysToColumns,
   isThemeChoice,
   isValidDays,
-  isValidHours,
   preferencesFromRow,
   type Preferences,
 } from "@/preferences/preferences";
@@ -24,7 +22,7 @@ export interface User {
   email: string;
   /** A club id as stored. It may no longer be in `CLUBS`: check with `findClub`. */
   homeClubId: string;
-  /** Theme, days and hours: what a new account or an old row gets is `DEFAULT_PREFERENCES`. */
+  /** Theme and each day's hours: what a new account gets is `DEFAULT_PREFERENCES`. */
   preferences: Preferences;
 }
 
@@ -32,20 +30,7 @@ export interface UserCredentials extends User {
   passwordHash: string;
 }
 
-const credentialsColumns = {
-  id: user.id,
-  email: user.email,
-  homeClubId: user.homeClubId,
-  passwordHash: user.passwordHash,
-  theme: user.theme,
-  days: user.days,
-  hours: user.hours,
-};
-
-type CredentialsRow = Pick<
-  typeof user.$inferSelect,
-  "id" | "email" | "homeClubId" | "passwordHash" | "theme" | "days" | "hours"
->;
+type CredentialsRow = typeof user.$inferSelect;
 
 function toCredentials(row: CredentialsRow): UserCredentials {
   return {
@@ -64,14 +49,14 @@ function normaliseEmail(email: string): string {
 
 export async function getUserCredentialsByEmail(email: string): Promise<UserCredentials | undefined> {
   const [row] = await getDb()
-    .select(credentialsColumns)
+    .select()
     .from(user)
     .where(eq(user.email, normaliseEmail(email)));
   return row && toCredentials(row);
 }
 
 export async function getUserCredentialsById(id: number): Promise<UserCredentials | undefined> {
-  const [row] = await getDb().select(credentialsColumns).from(user).where(eq(user.id, id));
+  const [row] = await getDb().select().from(user).where(eq(user.id, id));
   return row && toCredentials(row);
 }
 
@@ -97,7 +82,7 @@ export async function createUser(input: {
     const [created] = await tx
       .insert(user)
       .values({ email, passwordHash: input.passwordHash, homeClubId: input.homeClubId })
-      .returning(credentialsColumns);
+      .returning();
     if (!created) throw new Error("Insert returned no row");
     return { result: "created" as const, user: toCredentials(created) };
   });
@@ -147,22 +132,21 @@ export async function changePasswordHash(
 /**
  * Changes some of a user's settings; only the parts given are written. Every
  * part is re-checked here, at the write, whatever the caller did: an unknown
- * theme, or an empty or out-of-range day or hour list, is refused and nothing
- * is changed (the table's CHECKs are the last backstop).
+ * theme, or a week that isn't seven days each off or a valid start and end
+ * hour with at least one on, is refused and nothing is changed (the table's
+ * CHECKs are the last backstop).
  */
 export async function updatePreferences(
   userId: number,
   changes: Partial<Preferences>,
 ): Promise<"saved" | "invalid" | "not-found"> {
-  const { theme, days, hours } = changes;
+  const { theme, days } = changes;
   if (theme !== undefined && !isThemeChoice(theme)) return "invalid";
   if (days !== undefined && !isValidDays(days)) return "invalid";
-  if (hours !== undefined && !isValidHours(hours)) return "invalid";
 
   const set = {
     ...(theme !== undefined && { theme }),
-    ...(days !== undefined && { days: daysToMask(days) }),
-    ...(hours !== undefined && { hours: hoursToMask(hours) }),
+    ...(days !== undefined && daysToColumns(days)),
   };
   // Nothing to write is not a save.
   if (Object.keys(set).length === 0) return "invalid";

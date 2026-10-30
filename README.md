@@ -1,6 +1,6 @@
 # LX Weather
 
-A weather app for tennis players in Northern Ireland. It combines the forecasts of five weather providers into one aggregate forecast for each of the top tennis clubs, and shows one week of hour blocks from 10:00 to 22:00, each as green (good chance of no rain or wind), yellow (passable) or red (very unlikely you'll play). Works on the computer and the phone.
+A weather app for tennis players in Northern Ireland. It combines the forecasts of five weather providers into one aggregate forecast for each of the top tennis clubs, and shows one week of hour blocks from 08:00 to 22:00, each as green (good chance of no rain or wind), yellow (passable) or red (very unlikely you'll play). Works on the computer and the phone.
 
 **Read [`docs/vision.md`](docs/vision.md) first.** It's the single source of truth for what we're building: what's decided, what's still open, and the rules we build by.
 
@@ -62,7 +62,7 @@ npm run dev              # dev server at http://localhost:3000
 npm run build            # production build
 npm run start            # serve the production build
 npm run lint             # ESLint
-npm test                 # tests (tsx --test): accounts, the login limiter, sessions, password change, home club, your settings (theme, days, hours), club list, display formatting, the forecast engine. Uses throwaway databases, never local.db; no network
+npm test                 # tests (tsx --test): accounts, the login limiter, sessions, password change, home club, your settings (theme, each day's hours), the preferences migrations, club list, display formatting, the forecast engine. Uses throwaway databases, never local.db; no network
 npx tsc --noEmit         # type check
 npm run db:generate      # after editing src/db/schema.ts: write the SQL migration into drizzle/
 npm run db:migrate       # apply pending migrations in drizzle/ to DATABASE_URL
@@ -78,7 +78,7 @@ npm run forecast -- <latitude> <longitude>   # live week for any point
 | `/signup` | Email, password (12+ characters with a number, a capital letter and a symbol; a live checklist ticks the rules as you type), home club |
 | `/away` | The other clubs, alphabetical |
 | `/away/[clubId]` | The same week screen for that club |
-| `/account` | Email, change home club, change password (the same rules and checklist for the new one; logs out your other devices), which days and hours you see, log out |
+| `/account` | Email, change home club, change password (the same rules and checklist for the new one; logs out your other devices), which days you see and, for each, from what hour to what hour, log out |
 | (every logged-in screen) | The header: the LX Tennis Weather link home, a light/dark slider (one button: it switches to dark if the screen is light and to light if it is dark, saves your choice and comes back to the same page), and Account |
 
 ## Gotchas

@@ -1,6 +1,8 @@
 import { Suspense } from "react";
 import type { Club } from "@/clubs/clubs";
-import type { Preferences } from "@/preferences/preferences";
+import { ukDate } from "@/forecast/blocks";
+import { weekdayIndex, type Preferences } from "@/preferences/preferences";
+import { shownHourCounts } from "@/preferences/week-view";
 import { Button } from "@/components/button";
 import { Disclosure } from "./disclosure";
 import { ClubWeek } from "./club-week";
@@ -17,8 +19,8 @@ import styles from "./club-weather.module.css";
  * The club and the heading render at once; the forecast streams in behind
  * <Suspense>, because it may have to be fetched.
  *
- * `preferences` are the user's chosen days and hours, applied to the week
- * (home and away alike).
+ * `preferences` are the user's chosen days, each with its own hours, applied
+ * to the week (home and away alike).
  *
  * `home` is true for the home screen, which gets the Away Game button
  * (Core flow 4); an away screen links back to the list instead.
@@ -30,8 +32,10 @@ export function ClubWeather({
 }: {
   club: Club;
   home: boolean;
-  preferences: Pick<Preferences, "days" | "hours">;
+  preferences: Pick<Preferences, "days">;
 }) {
+  // Today's weekday (UK), only to order the skeleton's days like the week's.
+  const todayIndex = weekdayIndex(ukDate(new Date()));
   return (
     <div className={styles.screen}>
       <div className={styles.top}>
@@ -61,7 +65,7 @@ export function ClubWeather({
         */}
       <p className={styles.hint}>The colour is decided by the chance of rain and the wind speed.</p>
 
-      <Suspense fallback={<WeekLoading dayCount={preferences.days.length} hourCount={preferences.hours.length} />}>
+      <Suspense fallback={<WeekLoading hourCounts={shownHourCounts(preferences, todayIndex)} />}>
         <ClubWeek clubId={club.id} preferences={preferences} />
       </Suspense>
 

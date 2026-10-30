@@ -1,6 +1,5 @@
-import type { CSSProperties } from "react";
 import type { ShownDay } from "@/preferences/week-view";
-import { formatDayHeading, relativeDayName, stripColumns } from "@/weather/format";
+import { formatDayHeading, relativeDayName } from "@/weather/format";
 import styles from "./day-strip.module.css";
 import { HourCell } from "./hour-cell";
 
@@ -13,24 +12,22 @@ import { HourCell } from "./hour-cell";
  * DOM (hidden), so two clubs' weeks can be present at once, and the strip's
  * `aria-labelledby` must not resolve to the other club's heading.
  *
- * `hours` are the user's chosen hours: a cell's column is its place among
- * them, the same on every day, and the strip has one column per chosen hour.
+ * The strip is the same fixed number of equal columns on every day
+ * (day-strip.module.css), and the cells flow into it in order, so every hour
+ * box is the same size on every day however many hours that day shows.
  * A chosen day with no chosen hour left (today) says so.
  */
 export function DayStrip({
   clubId,
   shown,
-  hours,
   last,
 }: {
   clubId: string;
   shown: ShownDay;
-  hours: readonly number[];
   /** The last day of the week on screen: it keeps room under it for an open hour card (day-strip.module.css). */
   last: boolean;
 }) {
   const { day, index, blocks } = shown;
-  const columns = stripColumns(hours.length);
   const headingId = `day-${clubId}-${day.date}`;
   const date = formatDayHeading(day.date);
   const relative = relativeDayName(index);
@@ -44,19 +41,9 @@ export function DayStrip({
       {blocks.length === 0 ? (
         <p className={styles.empty}>No hours left today.</p>
       ) : (
-        <ol
-          aria-labelledby={headingId}
-          className={styles.strip}
-          style={{ "--columns-phone": columns.phone, "--columns-wide": columns.wide } as CSSProperties}
-        >
+        <ol aria-labelledby={headingId} className={styles.strip}>
           {blocks.map((block) => (
-            <HourCell
-              key={block.start}
-              block={block}
-              dayHeading={date}
-              position={hours.indexOf(block.startHour)}
-              hourCount={hours.length}
-            />
+            <HourCell key={block.start} block={block} dayHeading={date} />
           ))}
         </ol>
       )}

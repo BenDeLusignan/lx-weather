@@ -1,6 +1,6 @@
 import "server-only";
 import { updatePreferences, type User } from "@/data/users";
-import { isThemeChoice, parseDays, parseHours, type Preferences, type ThemeChoice } from "./preferences";
+import { isThemeChoice, parseDays, type Preferences, type ThemeChoice } from "./preferences";
 
 /**
  * What each settings form does with its post: where to redirect, and for the
@@ -8,7 +8,7 @@ import { isThemeChoice, parseDays, parseHours, type Preferences, type ThemeChoic
  * Server Actions (`actions.ts`) so tests can run them directly.
  *
  * Each form saves its own setting, so a refused one (say, every day
- * unchecked) never throws away what was changed in another.
+ * unticked) never throws away what was changed in another.
  */
 
 export interface PreferenceResult {
@@ -58,14 +58,18 @@ export async function submitTheme(user: User | null, formData: FormData, returnT
   return save(user, { saved: returnTo, refused: returnTo }, extra.length === 0 && isThemeChoice(theme) ? { theme } : null);
 }
 
-/** Checkboxes named `days`, values `mon`..`sun`; at least one. */
+/**
+ * The Account page's days and times form: a checkbox per weekday (`days`,
+ * values `mon`..`sun`) and, for a ticked day, its start and end (`mon-start`,
+ * `mon-end` ...). At least one day must be ticked (`?error=days`); anything
+ * else wrong, such as a start after its end or a time outside 08:00 to 22:00,
+ * is `?error=times`. Either way nothing is changed.
+ */
 export async function submitDays(user: User | null, formData: FormData): Promise<PreferenceResult> {
-  const days = parseDays(formData.getAll("days"));
-  return save(user, { saved: "/account?saved=days", refused: "/account?error=days" }, days && { days });
-}
-
-/** Checkboxes named `hours`, values `10`..`21`; at least one. */
-export async function submitHours(user: User | null, formData: FormData): Promise<PreferenceResult> {
-  const hours = parseHours(formData.getAll("hours"));
-  return save(user, { saved: "/account?saved=hours", refused: "/account?error=hours" }, hours && { hours });
+  const parsed = parseDays(formData);
+  if (!parsed.ok) {
+    const refused = parsed.reason === "no-day" ? "/account?error=days" : "/account?error=times";
+    return save(user, { saved: "/account?saved=days", refused }, null);
+  }
+  return save(user, { saved: "/account?saved=days", refused: "/account?error=times" }, { days: parsed.days });
 }

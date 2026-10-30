@@ -126,37 +126,3 @@ export function unknownReason(block: { rainLight: unknown; windLight: unknown })
   if (block.rainLight === null && block.windLight === null) return "no rain or wind data";
   return block.windLight === null ? "no wind data" : "no rain data";
 }
-
-/**
- * The most hour blocks that stay on one row of the strip on a phone. Up to
- * this many the strip is one row; more than this and it takes two rows, split
- * evenly (see `stripColumns`). The `6` fallbacks for `--columns-phone` in
- * day-strip.module.css and loading.module.css are the same number (the strip
- * always sets the variable; the fallback is only for a missing one).
- */
-export const HOURS_PER_PHONE_ROW = 6;
-
-/**
- * The strip's column counts for `hourCount` chosen hours. On a phone: one row
- * for up to six hours, otherwise two rows of `ceil(hourCount / 2)` columns, so
- * the rows balance (7 is 4 + 3, 9 is 5 + 4, 11 is 6 + 5) and never leave one
- * orphan cell; all twelve are 6 + 6. On a wide screen: one row. Fewer chosen
- * hours get fewer, wider columns instead of a row of empty ones. Set as CSS
- * variables on the strip.
- */
-export function stripColumns(hourCount: number): { phone: number; wide: number } {
-  const phone = hourCount <= HOURS_PER_PHONE_ROW ? hourCount : Math.ceil(hourCount / 2);
-  return { phone, wide: hourCount };
-}
-
-/**
- * The grid column (1-based) of a block in its day's strip, on a phone and on a
- * wide screen (one row), from `position`: the block's place, from 0, among the
- * user's `hourCount` chosen hours. Setting it per block keeps every chosen
- * hour in the same column on every day, even for today, whose finished hours
- * are simply not there. The phone column wraps at the same `stripColumns`
- * width the strip is built with.
- */
-export function gridColumns(position: number, hourCount: number): { phone: number; wide: number } {
-  return { phone: (position % stripColumns(hourCount).phone) + 1, wide: position + 1 };
-}

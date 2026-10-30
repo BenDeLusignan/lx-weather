@@ -4,7 +4,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/auth/current-user";
 import { returnPath } from "./return-path";
-import { submitDays, submitHours, submitTheme, type PreferenceResult } from "./submit";
+import { submitDays, submitTheme, type PreferenceResult } from "./submit";
 import { setThemeCookie } from "./theme-cookie";
 
 // Like the auth actions, each ends in redirect(): a form posted before
@@ -28,8 +28,4 @@ export async function saveTheme(formData: FormData): Promise<never> {
 
 export async function saveDays(formData: FormData): Promise<never> {
   return finish(await submitDays(await getCurrentUser(), formData));
-}
-
-export async function saveHours(formData: FormData): Promise<never> {
-  return finish(await submitHours(await getCurrentUser(), formData));
 }
