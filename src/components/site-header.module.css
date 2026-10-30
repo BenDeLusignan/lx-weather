@@ -11,17 +11,14 @@
 }
 
 /*
- * Installed web app only (Add to Home Screen): the name, switch and Account
- * start 24px below the status bar area (the body already clears the Dynamic
- * Island itself) because iOS blurs and fades page content in the strip just
- * under it; the header's colour still fills everything above. The same
- * distance LX Tennis's page starts at. Not applied in a browser tab or on a
- * desktop. See globals.css, .status-band.
+ * Home Screen web app on an iPhone only (`<html data-standalone>`): the name,
+ * switch and Account start `--status-clearance` lower, out of the strip under
+ * the status bar where iOS blurs and fades page content. The header's colour
+ * still fills everything above. Not applied in a browser tab or on a desktop.
+ * See globals.css, `--status-clearance` and `.status-band`.
  */
-@media (display-mode: standalone) {
-  .header {
-    padding-top: var(--space-6);
-  }
+:global(html[data-standalone]) .header {
+  padding-top: var(--status-clearance);
 }
 
 /*

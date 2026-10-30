@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Suspense } from "react";
 import { AccountTheme } from "@/components/account-theme";
 import { SiteHeader } from "@/components/site-header";
+import { STANDALONE_BOOT_SCRIPT } from "@/preferences/standalone";
 import { THEME_BOOT_SCRIPT } from "@/preferences/theme";
 import "./globals.css";
 import styles from "./layout.module.css";
@@ -42,12 +43,15 @@ export const viewport: Viewport = {
 // carry the user's choice from the server. The inline script in <head> copies
 // it from a cookie onto <html data-theme> before the first paint (no flash),
 // and AccountTheme brings the page in line with the account once it's known.
-// suppressHydrationWarning: the script changes <html> before React hydrates.
+// suppressHydrationWarning: the scripts change <html> before React hydrates.
+// The second script marks <html data-standalone> for a Home Screen launch on
+// an iPhone (src/preferences/standalone.ts).
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en-GB" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_BOOT_SCRIPT }} />
+        <script dangerouslySetInnerHTML={{ __html: STANDALONE_BOOT_SCRIPT }} />
       </head>
       <body>
         {/* Solid fill behind an iPhone's status bar (globals.css, .status-band); nothing to read, so hidden from assistive tech. */}
