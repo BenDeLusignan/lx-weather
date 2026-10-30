@@ -3,9 +3,25 @@
  * it in the dark theme (vision, Theme > Team conventions 10).
  */
 .header {
+  /* Landscape on a notched iPhone: keep the content clear of the notch while the colour runs to the edge. 0 elsewhere. */
+  padding-inline: env(safe-area-inset-left) env(safe-area-inset-right);
   border-bottom: 1px solid var(--color-header-border);
   background: var(--color-header-bg);
   color: var(--color-header-text);
+}
+
+/*
+ * Installed web app only (Add to Home Screen): the name, switch and Account
+ * start 24px below the status bar area (the body already clears the Dynamic
+ * Island itself) because iOS blurs and fades page content in the strip just
+ * under it; the header's colour still fills everything above. The same
+ * distance LX Tennis's page starts at. Not applied in a browser tab or on a
+ * desktop. See globals.css, .status-band.
+ */
+@media (display-mode: standalone) {
+  .header {
+    padding-top: var(--space-6);
+  }
 }
 
 /*

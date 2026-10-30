@@ -190,7 +190,8 @@
    * so the page's own links and the header's are one blue family. `hover` is
    * the quiet buttons' hover fill and `focus` the keyboard ring; both are
    * scoped to the header (site-header.module.css). The `themeColor` in
-   * layout.tsx mirrors `bg`.
+   * layout.tsx mirrors `bg`, and `.status-band` (below) paints it behind an
+   * iPhone's status bar.
    */
   --color-header-bg: light-dark(#7ab8f5, #000000);
   --color-header-text: light-dark(#0a2a43, #f5f5f7);
@@ -308,6 +309,52 @@ body {
   line-height: 1.5;
   /* A long word or address must wrap, never push the page wider than the screen. */
   overflow-wrap: break-word;
+  /*
+   * Clear of the Dynamic Island / status bar at the top and the home
+   * indicator at the bottom. `viewport-fit=cover` (layout.tsx) makes these
+   * real on an iPhone web app; each is 0 on a desktop and in a phone
+   * browser's own window, so there nothing moves. The sides are handled by
+   * the header and <main>, so the header's band can run to the screen's edge.
+   */
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/*
+ * The solid band behind the status bar, as tall as the status bar area (0
+ * where there is none). It is a real fixed element with an opaque fill, so
+ * the status bar is never over bare page. It is header-coloured on a screen
+ * with the header and page-coloured without (log in and sign up), in both
+ * themes, from the same `data-theme` as the rest, so it never depends on the
+ * device's setting the way `themeColor` does. z-index: above the page, below
+ * the skip link.
+ */
+.status-band {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 10;
+  height: env(safe-area-inset-top);
+  background: var(--color-bg);
+  pointer-events: none;
+}
+
+body:has(> header) > .status-band {
+  background: var(--color-header-bg);
+}
+
+/*
+ * Only in an installed web app (Add to Home Screen): iOS blurs and fades
+ * whatever sits in the strip of page just under the Dynamic Island / status
+ * bar, which is what washed out the header's name, switch and Account. So the
+ * content starts a further 24px down, as it does on LX Tennis (its page
+ * starts with `--space-6` of padding), while the header's colour still fills
+ * everything above. A log in or sign up screen has no header, so its own top
+ * moves instead. In a browser tab and on a desktop this never applies.
+ */
+@media (display-mode: standalone) {
+  body:not(:has(> header)) {
+    padding-top: calc(env(safe-area-inset-top) + var(--space-6));
+  }
 }
 
 h1,
@@ -339,8 +386,8 @@ ol {
 /* Visible only when focused: the first stop for keyboard users. */
 .skip-link {
   position: absolute;
-  top: var(--space-2);
-  left: var(--space-2);
+  top: calc(var(--space-2) + env(safe-area-inset-top));
+  left: calc(var(--space-2) + env(safe-area-inset-left));
   z-index: 20;
   padding: var(--space-2) var(--space-4);
   border-radius: var(--radius-sm);

@@ -15,11 +15,20 @@ export const metadata: Metadata = {
     "Hour-by-hour playing conditions for tennis clubs in Northern Ireland, from five forecast providers combined.",
 };
 
-// The browser's address bar on a phone. These two mirror --color-header-bg in
-// globals.css (light, then dark; the bar sits right above the header on every
-// logged-in screen); update them together. They can only follow the device,
-// not the user's choice with the header's light/dark switch.
+// themeColor is the browser's address bar on a phone. These two mirror
+// --color-header-bg in globals.css (light, then dark; the bar sits right above
+// the header on every logged-in screen); update them together. They can only
+// follow the device, not the user's choice with the header's light/dark switch,
+// and an iPhone web app (Add to Home Screen) ignores them, which is why the
+// status bar's colour there comes from .status-band, not from here.
+//
+// viewportFit "cover": the page runs edge to edge, so env(safe-area-inset-*)
+// reports the notch / Dynamic Island, status bar and home indicator, and the
+// body pads itself clear of them (globals.css). Without it an iPhone web app
+// reports 0 for every inset, so nothing could be kept out from under the
+// status bar, where iOS blurs whatever it finds.
 export const viewport: Viewport = {
+  viewportFit: "cover",
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#7ab8f5" },
     { media: "(prefers-color-scheme: dark)", color: "#000000" },
@@ -41,6 +50,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <script dangerouslySetInnerHTML={{ __html: THEME_BOOT_SCRIPT }} />
       </head>
       <body>
+        {/* Solid fill behind an iPhone's status bar (globals.css, .status-band); nothing to read, so hidden from assistive tech. */}
+        <div className="status-band" aria-hidden="true" />
         <a className="skip-link" href="#main">
           Skip to content
         </a>
